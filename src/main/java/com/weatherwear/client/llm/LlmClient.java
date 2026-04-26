@@ -1,5 +1,6 @@
 package com.weatherwear.client.llm;
 
+import com.weatherwear.exception.LlmApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import java.util.Map;
 public class LlmClient {
 
     private final RestClient restClient;
+    private final LlmResponseParser responseParser;
 
     @Value("${llm.api.url}")
     private String apiUrl;
@@ -20,24 +22,26 @@ public class LlmClient {
     private String apiKey;
 
     public String generateRecommendation(String prompt) {
-        Map<String, Object> request = Map.of(
-                "model", "gpt-4o-mini",
-                "messages", new Object[]{
-                        Map.of("role", "user", "content", prompt)
-                }
-        );
+        try {
+            Map<String, Object> request = Map.of(
+                    "model", "gpt-4o-mini",
+                    "messages", new Object[]{
+                            Map.of("role", "user", "content", prompt)
+                    }
+            );
 
-        Map response = restClient.post()
-                .uri(apiUrl)
-                .header("Authorization", "Bearer " + apiKey)
-                .header("Content-Type", "application/json")
-                .body(request)
-                .retrieve()
-                .body(Map.class);
+            Map<String, Object> response = restClient.post()
+                    .uri(apiUrl)
+                    .header("Authorization", "Bearer " + apiKey)
+                    .header("Content-Type", "application/json")
+                    .body(request)
+                    .retrieve()
+                    .body(Map.class);
 
-        var choices = (java.util.List<Map>) response.get("choices");
-        var message = (Map) choices.get(0).get("message");
+            return responseParser.parseContent(response);
 
-        return (String) message.get("content");
+        } catch (Exception ex) {
+            throw new LlmApiException("Failed to get response from AI assistant");
+        }
     }
 }

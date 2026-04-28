@@ -1,5 +1,6 @@
 package com.weatherwear.entity;
 
+import com.weatherwear.common.ActivityLevel;
 import com.weatherwear.common.SensitivityLevel;
 import com.weatherwear.common.StylePreference;
 import jakarta.persistence.*;
@@ -37,6 +38,27 @@ public class UserPreference {
     @Column(name = "heat_sensitivity", nullable = false)
     private SensitivityLevel heatSensitivity;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "wind_sensitivity", nullable = false)
+    private SensitivityLevel windSensitivity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rain_sensitivity", nullable = false)
+    private SensitivityLevel rainSensitivity;
+
+    @Column(name = "max_layers", nullable = false)
+    private Short maxLayers;
+
+    @Column(name = "prefers_headwear", nullable = false)
+    private Boolean prefersHeadwear;
+
+    @Column(name = "prefers_waterproof", nullable = false)
+    private Boolean prefersWaterproof;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "activity_level", nullable = false)
+    private ActivityLevel activityLevel;
+
     @Column(name = "preferred_colors")
     private String preferredColors;
 
@@ -52,7 +74,16 @@ public class UserPreference {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        applyDefaults();
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+        applyDefaults();
+    }
+
+    private void applyDefaults() {
         if (this.stylePreference == null) {
             this.stylePreference = StylePreference.CASUAL;
         }
@@ -64,10 +95,29 @@ public class UserPreference {
         if (this.heatSensitivity == null) {
             this.heatSensitivity = SensitivityLevel.MEDIUM;
         }
-    }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        if (this.windSensitivity == null) {
+            this.windSensitivity = SensitivityLevel.MEDIUM;
+        }
+
+        if (this.rainSensitivity == null) {
+            this.rainSensitivity = SensitivityLevel.MEDIUM;
+        }
+
+        if (this.maxLayers == null) {
+            this.maxLayers = 3;
+        }
+
+        if (this.prefersHeadwear == null) {
+            this.prefersHeadwear = false;
+        }
+
+        if (this.prefersWaterproof == null) {
+            this.prefersWaterproof = false;
+        }
+
+        if (this.activityLevel == null) {
+            this.activityLevel = ActivityLevel.MEDIUM;
+        }
     }
 }

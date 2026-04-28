@@ -3,6 +3,7 @@ package com.weatherwear.security;
 import com.weatherwear.common.Constants;
 import com.weatherwear.entity.User;
 import com.weatherwear.repository.UserRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,14 +42,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(Constants.TOKEN_PREFIX.length());
-        String email = jwtService.extractEmail(token);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        try {
+            String email = jwtService.extractEmail(token);
 
-            User user = userRepository.findByEmail(email)
-                    .orElse(null);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            if (user != null && jwtService.isTokenValid(token, user)) {
+                User user = userRepository.findByEmail(email)
+                        .orElse(null);
+
+                if (user == null || !jwtService.isTokenValid(token, user)) {
+                    rejectUnauthorized(response);
+                    return;
+                }
+
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
 
                 UsernamePasswordAuthenticationToken authenticationToken =
@@ -64,8 +71,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
+        } catch (JwtException | IllegalArgumentException ex) {
+            rejectUnauthorized(response);
+            return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void rejectUnauthorized(HttpServletResponse response) throws IOException {
+        SecurityContextHolder.clearContext();
+        response.sendError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Invalid or expired JWT token"
+        );
     }
 }

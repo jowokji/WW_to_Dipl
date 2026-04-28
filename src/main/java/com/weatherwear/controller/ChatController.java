@@ -5,6 +5,7 @@ import com.weatherwear.dto.chat.ChatRequest;
 import com.weatherwear.dto.chat.ChatResponse;
 import com.weatherwear.dto.chat.ChatSessionResponse;
 import com.weatherwear.service.ChatService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping
-    public ChatResponse sendMessage(@RequestBody ChatRequest request) {
+    public ChatResponse sendMessage(@Valid @RequestBody ChatRequest request) {
         return chatService.sendMessage(request);
     }
 

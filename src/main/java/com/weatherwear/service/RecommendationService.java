@@ -52,7 +52,7 @@ public class RecommendationService {
     }
 
     private WeatherResponse getWeather(RecommendationRequest request) {
-        if (request.getCity() != null) {
+        if (request.getCity() != null && !request.getCity().isBlank()) {
             return weatherService.getWeatherByCity(request.getCity());
         } else {
             return weatherService.getWeatherByCoordinates(

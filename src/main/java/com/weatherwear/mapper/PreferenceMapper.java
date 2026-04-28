@@ -13,6 +13,12 @@ public class PreferenceMapper {
                 preference.getStylePreference(),
                 preference.getColdSensitivity(),
                 preference.getHeatSensitivity(),
+                preference.getWindSensitivity(),
+                preference.getRainSensitivity(),
+                preference.getMaxLayers(),
+                preference.getPrefersHeadwear(),
+                preference.getPrefersWaterproof(),
+                preference.getActivityLevel(),
                 preference.getPreferredColors(),
                 preference.getAvoidItems()
         );

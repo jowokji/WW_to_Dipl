@@ -3,6 +3,7 @@ package com.weatherwear.controller;
 import com.weatherwear.dto.recommendation.RecommendationRequest;
 import com.weatherwear.dto.recommendation.RecommendationResponse;
 import com.weatherwear.service.RecommendationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +16,7 @@ public class RecommendationController {
 
     @PostMapping
     public RecommendationResponse getRecommendation(
-            @RequestBody RecommendationRequest request
+            @Valid @RequestBody RecommendationRequest request
     ) {
         return recommendationService.getRecommendation(request);
     }

@@ -27,7 +27,7 @@ public class RecommendationHistory {
     @Column(name = "weather_summary", length = 1000)
     private String weatherSummary;
 
-    @Column(name = "recommendation_text", length = 2000)
+    @Column(name = "recommendation_text", columnDefinition = "TEXT")
     private String recommendationText;
 
     @Column(name = "created_at", nullable = false)

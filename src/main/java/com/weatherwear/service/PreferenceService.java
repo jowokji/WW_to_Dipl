@@ -1,5 +1,6 @@
 package com.weatherwear.service;
 
+import com.weatherwear.common.ActivityLevel;
 import com.weatherwear.common.SensitivityLevel;
 import com.weatherwear.common.StylePreference;
 import com.weatherwear.dto.preference.PreferenceRequest;
@@ -36,6 +37,36 @@ public class PreferenceService {
         preference.setStylePreference(request.getStylePreference());
         preference.setColdSensitivity(request.getColdSensitivity());
         preference.setHeatSensitivity(request.getHeatSensitivity());
+        preference.setWindSensitivity(valueOrDefault(
+                request.getWindSensitivity(),
+                preference.getWindSensitivity(),
+                SensitivityLevel.MEDIUM
+        ));
+        preference.setRainSensitivity(valueOrDefault(
+                request.getRainSensitivity(),
+                preference.getRainSensitivity(),
+                SensitivityLevel.MEDIUM
+        ));
+        preference.setMaxLayers(valueOrDefault(
+                request.getMaxLayers(),
+                preference.getMaxLayers(),
+                (short) 3
+        ));
+        preference.setPrefersHeadwear(valueOrDefault(
+                request.getPrefersHeadwear(),
+                preference.getPrefersHeadwear(),
+                false
+        ));
+        preference.setPrefersWaterproof(valueOrDefault(
+                request.getPrefersWaterproof(),
+                preference.getPrefersWaterproof(),
+                false
+        ));
+        preference.setActivityLevel(valueOrDefault(
+                request.getActivityLevel(),
+                preference.getActivityLevel(),
+                ActivityLevel.MEDIUM
+        ));
         preference.setPreferredColors(request.getPreferredColors());
         preference.setAvoidItems(request.getAvoidItems());
 
@@ -50,11 +81,25 @@ public class PreferenceService {
                 .stylePreference(StylePreference.CASUAL)
                 .coldSensitivity(SensitivityLevel.MEDIUM)
                 .heatSensitivity(SensitivityLevel.MEDIUM)
+                .windSensitivity(SensitivityLevel.MEDIUM)
+                .rainSensitivity(SensitivityLevel.MEDIUM)
+                .maxLayers((short) 3)
+                .prefersHeadwear(false)
+                .prefersWaterproof(false)
+                .activityLevel(ActivityLevel.MEDIUM)
                 .preferredColors("")
                 .avoidItems("")
                 .build();
 
         return preferenceRepository.save(preference);
+    }
+
+    private <T> T valueOrDefault(T requestValue, T currentValue, T defaultValue) {
+        if (requestValue != null) {
+            return requestValue;
+        }
+
+        return currentValue != null ? currentValue : defaultValue;
     }
 
     private PreferenceResponse toResponse(UserPreference preference) {
@@ -63,6 +108,12 @@ public class PreferenceService {
                 preference.getStylePreference(),
                 preference.getColdSensitivity(),
                 preference.getHeatSensitivity(),
+                preference.getWindSensitivity(),
+                preference.getRainSensitivity(),
+                preference.getMaxLayers(),
+                preference.getPrefersHeadwear(),
+                preference.getPrefersWaterproof(),
+                preference.getActivityLevel(),
                 preference.getPreferredColors(),
                 preference.getAvoidItems()
         );

@@ -10,6 +10,7 @@ import com.weatherwear.dto.weather.WeatherResponse;
 import com.weatherwear.entity.ChatMessage;
 import com.weatherwear.entity.ChatSession;
 import com.weatherwear.entity.User;
+import com.weatherwear.exception.ResourceNotFoundException;
 import com.weatherwear.repository.ChatMessageRepository;
 import com.weatherwear.repository.ChatSessionRepository;
 import com.weatherwear.security.SecurityUtils;
@@ -82,7 +83,7 @@ public class ChatService {
         User user = securityUtils.getCurrentUser();
 
         ChatSession session = sessionRepository.findByIdAndUser(sessionId, user)
-                .orElseThrow(() -> new RuntimeException("Chat session not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Chat session not found"));
 
         return messageRepository.findBySessionOrderByCreatedAtAsc(session)
                 .stream()
@@ -99,7 +100,7 @@ public class ChatService {
         User user = securityUtils.getCurrentUser();
 
         ChatSession session = sessionRepository.findByIdAndUser(sessionId, user)
-                .orElseThrow(() -> new RuntimeException("Chat session not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Chat session not found"));
 
         sessionRepository.delete(session);
     }
@@ -107,7 +108,7 @@ public class ChatService {
     private ChatSession getOrCreateSession(ChatRequest request, User user) {
         if (request.getSessionId() != null) {
             return sessionRepository.findByIdAndUser(request.getSessionId(), user)
-                    .orElseThrow(() -> new RuntimeException("Chat session not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Chat session not found"));
         }
 
         ChatSession session = ChatSession.builder()

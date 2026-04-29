@@ -1,0 +1,30 @@
+# Maven
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+
+# Java
+*.class
+
+# Docker
+*.tar
+
+# Local configs
+.codex-m2/
+
+# Build
+build/

@@ -4,19 +4,27 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
 
     private static final String SECURITY_SCHEME_NAME = "bearerAuth";
 
+    @Value("${openapi.server-url:}")
+    private String serverUrl;
+
     @Bean
     public OpenAPI weatherWearOpenAPI() {
-        return new OpenAPI()
+        OpenAPI openAPI = new OpenAPI()
                 .info(new Info()
                         .title("WeatherWear API")
                         .description("REST API for weather forecast, clothing recommendations and AI assistant")
@@ -39,5 +47,11 @@ public class OpenApiConfig {
                                         .bearerFormat("JWT")
                         )
                 );
+
+        if (StringUtils.hasText(serverUrl)) {
+            openAPI.setServers(List.of(new Server().url(serverUrl)));
+        }
+
+        return openAPI;
     }
 }

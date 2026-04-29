@@ -31,3 +31,6 @@ llm:
   api:
     key: ${LLM_API_KEY}
     url: ${LLM_API_URL:https://api.openai.com/v1/chat/completions}
+
+openapi:
+  server-url: ${OPENAPI_SERVER_URL:https://wwtodipl-production.up.railway.app/api}

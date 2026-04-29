@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: weatherwear_user
       POSTGRES_PASSWORD: weatherwear_password
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - weatherwear_postgres_data:/var/lib/postgresql/data
 
@@ -19,9 +19,10 @@ services:
     depends_on:
       - postgres
     ports:
-      - "8081:8081"
+      - "8090:8090"
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8090
 
       DATABASE_URL: jdbc:postgresql://postgres:5432/weatherwear
       DATABASE_USERNAME: weatherwear_user

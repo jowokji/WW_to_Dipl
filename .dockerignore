@@ -1,0 +1,8 @@
+.git
+.idea
+target
+.codex-m2
+*.iml
+Dockerfile
+docker-compose.yml
+README.md

@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         )
 )
 @AutoConfigureMockMvc(addFilters = false)
-class AuthControllerTest {  ++fdfs
+class AuthControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

@@ -20,6 +20,11 @@ public class HistoryController {
         return historyService.getCurrentUserHistory();
     }
 
+    @GetMapping("/{id}")
+    public HistoryResponse getHistoryDetails(@PathVariable Long id) {
+        return historyService.getHistoryDetails(id);
+    }
+
     @DeleteMapping
     public ResponseEntity<Void> clearHistory() {
         historyService.clearCurrentUserHistory();

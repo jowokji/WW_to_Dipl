@@ -19,6 +19,13 @@ public class PreferenceController {
         return preferenceService.getCurrentUserPreferences();
     }
 
+    @PostMapping
+    public PreferenceResponse createPreferences(
+            @Valid @RequestBody PreferenceRequest request
+    ) {
+        return preferenceService.createCurrentUserPreferences(request);
+    }
+
     @PutMapping
     public PreferenceResponse updatePreferences(
             @Valid @RequestBody PreferenceRequest request

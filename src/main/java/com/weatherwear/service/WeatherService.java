@@ -26,6 +26,13 @@ public class WeatherService {
     }
 
     public WeatherResponse getWeatherByCoordinates(Double lat, Double lon) {
+        return weatherCacheRepository.findTopByLatitudeAndLongitudeOrderByCachedAtDesc(lat, lon)
+                .filter(cache -> !cache.isExpired())
+                .map(cache -> weatherMapper.toResponse(cache, true))
+                .orElseGet(() -> fetchAndCacheWeatherByCoordinates(lat, lon));
+    }
+
+    private WeatherResponse fetchAndCacheWeatherByCoordinates(Double lat, Double lon) {
         OpenWeatherResponse apiResponse = weatherApiClient.getWeatherByCoordinates(lat, lon);
 
         WeatherCache cache = weatherMapper.toCache(

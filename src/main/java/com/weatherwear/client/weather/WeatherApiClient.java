@@ -29,6 +29,8 @@ public class WeatherApiClient {
             throw new WeatherApiException("City is required");
         }
 
+        validateConfiguration();
+
         String url = UriComponentsBuilder.fromHttpUrl(apiUrl)
                 .queryParam("q", city.trim())
                 .queryParam("appid", apiKey)
@@ -43,6 +45,8 @@ public class WeatherApiClient {
         if (lat == null || lon == null) {
             throw new WeatherApiException("Latitude and longitude are required");
         }
+
+        validateConfiguration();
 
         String url = UriComponentsBuilder.fromHttpUrl(apiUrl)
                 .queryParam("lat", lat)

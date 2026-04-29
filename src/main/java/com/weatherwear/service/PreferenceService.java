@@ -28,12 +28,32 @@ public class PreferenceService {
         return toResponse(preference);
     }
 
+    public PreferenceResponse createCurrentUserPreferences(PreferenceRequest request) {
+        User user = securityUtils.getCurrentUser();
+
+        UserPreference preference = UserPreference.builder()
+                .user(user)
+                .build();
+
+        applyRequest(preference, request);
+
+        return toResponse(preferenceRepository.save(preference));
+    }
+
     public PreferenceResponse updateCurrentUserPreferences(PreferenceRequest request) {
         User user = securityUtils.getCurrentUser();
 
         UserPreference preference = preferenceRepository.findByUser(user)
                 .orElseGet(() -> createDefaultPreferences(user));
 
+        applyRequest(preference, request);
+
+        UserPreference savedPreference = preferenceRepository.save(preference);
+
+        return toResponse(savedPreference);
+    }
+
+    private void applyRequest(UserPreference preference, PreferenceRequest request) {
         preference.setStylePreference(request.getStylePreference());
         preference.setColdSensitivity(request.getColdSensitivity());
         preference.setHeatSensitivity(request.getHeatSensitivity());
@@ -69,10 +89,6 @@ public class PreferenceService {
         ));
         preference.setPreferredColors(request.getPreferredColors());
         preference.setAvoidItems(request.getAvoidItems());
-
-        UserPreference savedPreference = preferenceRepository.save(preference);
-
-        return toResponse(savedPreference);
     }
 
     private UserPreference createDefaultPreferences(User user) {

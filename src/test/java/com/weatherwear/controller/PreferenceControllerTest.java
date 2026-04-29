@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -89,6 +90,18 @@ class PreferenceControllerTest {
                 .thenReturn(preferenceResponse());
 
         mockMvc.perform(put("/preferences")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(preferenceRequest())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.stylePreference").value("CASUAL"));
+    }
+
+    @Test
+    void createPreferences_returnsOk() throws Exception {
+        when(preferenceService.createCurrentUserPreferences(any(PreferenceRequest.class)))
+                .thenReturn(preferenceResponse());
+
+        mockMvc.perform(post("/preferences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(preferenceRequest())))
                 .andExpect(status().isOk())

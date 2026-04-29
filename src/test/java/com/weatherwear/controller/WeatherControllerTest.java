@@ -54,6 +54,20 @@ class WeatherControllerTest {
     }
 
     @Test
+    void getWeather_blankCity_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/weather").param("city", " "))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getWeatherByCoordinates_invalidLatitude_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/weather/coordinates")
+                        .param("lat", "999")
+                        .param("lon", "25"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void getWeather_unauthorized_returnsUnauthorized() throws Exception {
         when(weatherService.getWeatherByCity("Vilnius"))
                 .thenThrow(new UnauthorizedException());

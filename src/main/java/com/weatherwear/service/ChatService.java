@@ -128,8 +128,8 @@ public class ChatService {
             weatherContext = """
                     Current weather:
                     City: %s
-                    Temperature: %s°C
-                    Feels like: %s°C
+                    Temperature: %s C
+                    Feels like: %s C
                     Wind: %s m/s
                     Condition: %s
                     Humidity: %s%%

@@ -73,6 +73,7 @@ class PreferenceServiceTest {
         PreferenceRequest request = request();
 
         when(securityUtils.getCurrentUser()).thenReturn(user);
+        when(preferenceRepository.findByUser(user)).thenReturn(Optional.empty());
         when(preferenceRepository.save(any(UserPreference.class))).thenAnswer(invocation -> {
             UserPreference saved = invocation.getArgument(0);
             saved.setId(30L);
@@ -90,6 +91,26 @@ class PreferenceServiceTest {
                 ArgumentCaptor.forClass(UserPreference.class);
         verify(preferenceRepository).save(preferenceCaptor.capture());
         assertThat(preferenceCaptor.getValue().getUser()).isSameAs(user);
+    }
+
+    @Test
+    void createPreferences_existingPreference_updatesExistingRecord() {
+        User user = user();
+        UserPreference existingPreference = preference(user);
+        PreferenceRequest request = request();
+
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+        when(preferenceRepository.findByUser(user)).thenReturn(Optional.of(existingPreference));
+        when(preferenceRepository.save(existingPreference)).thenReturn(existingPreference);
+
+        PreferenceResponse response = preferenceService.createCurrentUserPreferences(request);
+
+        assertThat(response.getId()).isEqualTo(10L);
+        assertThat(response.getStylePreference()).isEqualTo(StylePreference.BUSINESS);
+        assertThat(response.getColdSensitivity()).isEqualTo(SensitivityLevel.HIGH);
+        assertThat(response.getHeatSensitivity()).isEqualTo(SensitivityLevel.LOW);
+
+        verify(preferenceRepository).save(existingPreference);
     }
 
     @Test

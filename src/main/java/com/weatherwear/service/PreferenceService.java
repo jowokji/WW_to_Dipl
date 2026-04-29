@@ -31,9 +31,10 @@ public class PreferenceService {
     public PreferenceResponse createCurrentUserPreferences(PreferenceRequest request) {
         User user = securityUtils.getCurrentUser();
 
-        UserPreference preference = UserPreference.builder()
-                .user(user)
-                .build();
+        UserPreference preference = preferenceRepository.findByUser(user)
+                .orElseGet(() -> UserPreference.builder()
+                        .user(user)
+                        .build());
 
         applyRequest(preference, request);
 

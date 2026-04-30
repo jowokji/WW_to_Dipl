@@ -10,8 +10,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5433/weatherwear
-    username: weatherwear_user
-    password: ${PGPASSWORD:}
+    username: ${PGUSER:weatherwear_app}
+    password: ${PGPASSWORD:${APP_DB_PASSWORD:}}
     driver-class-name: org.postgresql.Driver
 
   jpa:

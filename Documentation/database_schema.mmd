@@ -1,0 +1,84 @@
+erDiagram
+    users {
+        bigint id PK
+        varchar email UK
+        varchar password
+        varchar role
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    user_preferences {
+        bigint id PK
+        bigint user_id FK,UK
+        varchar style_preference
+        varchar cold_sensitivity
+        varchar heat_sensitivity
+        varchar wind_sensitivity
+        varchar rain_sensitivity
+        smallint max_layers
+        boolean prefers_headwear
+        boolean prefers_waterproof
+        varchar activity_level
+        varchar preferred_colors
+        varchar avoid_items
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    weather_cache {
+        bigint id PK
+        varchar city
+        double latitude
+        double longitude
+        double temperature
+        double feels_like
+        int humidity
+        double wind_speed
+        varchar condition
+        double precipitation
+        timestamp cached_at
+        timestamp expires_at
+    }
+
+    recommendation_history {
+        bigint id PK
+        bigint user_id FK
+        varchar city
+        varchar weather_summary
+        text recommendation_text
+        timestamp created_at
+    }
+
+    user_feedback {
+        bigint id PK
+        bigint recommendation_history_id FK
+        bigint user_id FK
+        varchar feedback_type
+        smallint rating
+        text comment
+        timestamp created_at
+    }
+
+    chat_sessions {
+        bigint id PK
+        bigint user_id FK
+        varchar title
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    chat_messages {
+        bigint id PK
+        bigint session_id FK
+        varchar role
+        text content
+        timestamp created_at
+    }
+
+    users ||--|| user_preferences : has
+    users ||--o{ recommendation_history : creates
+    recommendation_history ||--o{ user_feedback : receives
+    users ||--o{ user_feedback : writes
+    users ||--o{ chat_sessions : starts
+    chat_sessions ||--o{ chat_messages : contains

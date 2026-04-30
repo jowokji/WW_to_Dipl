@@ -1,0 +1,8 @@
+flowchart LR
+    Client["Mobile or web client"] --> API["WeatherWear REST API"]
+    API --> DB["PostgreSQL"]
+    API --> Weather["OpenWeather API"]
+    API --> LLM["LLM API"]
+    Dev["Developer"] --> Swagger["Swagger UI and OpenAPI docs"]
+    Swagger --> API
+

@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant Client
+    participant API as RecommendationController
+    participant Auth as JwtAuthFilter
+    participant Weather as WeatherService
+    participant Cache as WeatherCacheRepository
+    participant LLM as LlmClient
+    participant DB as PostgreSQL
+
+    Client->>Auth: POST /api/recommendations with Bearer token
+    Auth->>API: Authenticated request
+    API->>Weather: getWeather(city or coordinates)
+    Weather->>Cache: find non-expired cached weather
+    alt cache hit
+        Cache-->>Weather: cached weather
+    else cache miss
+        Weather->>Weather: call OpenWeather API
+        Weather->>Cache: save weather cache row
+    end
+    API->>DB: load current user preferences
+    API->>LLM: generate clothing recommendation
+    API->>DB: save recommendation history
+    API-->>Client: 200 RecommendationResponse
+

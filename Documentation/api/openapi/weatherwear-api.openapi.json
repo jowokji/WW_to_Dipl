@@ -1,0 +1,1769 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "WeatherWear API",
+    "description": "REST API for user authentication, weather lookup, AI clothing recommendations, recommendation history, feedback, and an AI style chat assistant.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Dubrovin Mikita",
+      "email": "dubrovin.nikita@student.ehu.lt"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8090/api",
+      "description": "Local development server"
+    },
+    {
+      "url": "https://wwtodipl-production.up.railway.app/api",
+      "description": "Production server configured by application-prod.yml"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Registration and login endpoints that issue JWT access tokens."
+    },
+    {
+      "name": "Weather",
+      "description": "Authenticated weather lookup endpoints backed by OpenWeather and a 30-minute cache."
+    },
+    {
+      "name": "Recommendations",
+      "description": "AI outfit recommendation workflow based on weather, optional occasion, and saved user preferences."
+    },
+    {
+      "name": "Preferences",
+      "description": "Authenticated user preference management."
+    },
+    {
+      "name": "History",
+      "description": "Authenticated recommendation history retrieval and deletion."
+    },
+    {
+      "name": "Feedback",
+      "description": "Authenticated user feedback for generated recommendations."
+    },
+    {
+      "name": "Chat",
+      "description": "Authenticated conversational AI assistant for weather-aware style questions."
+    },
+    {
+      "name": "Health",
+      "description": "Public service health endpoint."
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "registerUser",
+        "summary": "Register a new user",
+        "description": "Creates a user account with role USER and returns a JWT token for immediate use.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Register with email and password",
+                  "value": {
+                    "email": "alex@example.com",
+                    "password": "securePass123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                },
+                "examples": {
+                  "created": {
+                    "value": {
+                      "token": "eyJhbGciOiJIUzI1NiJ9.example.signature",
+                      "email": "alex@example.com",
+                      "role": "USER"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "loginUser",
+        "summary": "Log in",
+        "description": "Authenticates an existing user and returns a JWT token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "examples": {
+                "default": {
+                  "value": {
+                    "email": "alex@example.com",
+                    "password": "securePass123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "token": "eyJhbGciOiJIUzI1NiJ9.example.signature",
+                      "email": "alex@example.com",
+                      "role": "USER"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/weather": {
+      "get": {
+        "tags": [
+          "Weather"
+        ],
+        "operationId": "getWeatherByCity",
+        "summary": "Get weather by city",
+        "description": "Returns the current weather for a city. The backend reuses cached weather records for 30 minutes.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "required": true,
+            "description": "City name. Maximum length is 120 characters.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "example": "Vilnius"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current weather for the requested city.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeatherResponse"
+                },
+                "examples": {
+                  "weather": {
+                    "value": {
+                      "city": "Vilnius",
+                      "latitude": 54.6872,
+                      "longitude": 25.2797,
+                      "temperature": 12.4,
+                      "feelsLike": 10.8,
+                      "humidity": 71,
+                      "windSpeed": 4.6,
+                      "condition": "CLOUDS",
+                      "precipitation": 0.0,
+                      "cached": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGatewayError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/weather/coordinates": {
+      "get": {
+        "tags": [
+          "Weather"
+        ],
+        "operationId": "getWeatherByCoordinates",
+        "summary": "Get weather by coordinates",
+        "description": "Returns current weather for latitude and longitude. Latitude must be between -90 and 90; longitude must be between -180 and 180.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "example": 54.6872
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double",
+              "minimum": -180,
+              "maximum": 180
+            },
+            "example": 25.2797
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current weather for the requested coordinates.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeatherResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGatewayError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/recommendations": {
+      "post": {
+        "tags": [
+          "Recommendations"
+        ],
+        "operationId": "createRecommendation",
+        "summary": "Generate a clothing recommendation",
+        "description": "Generates an AI clothing recommendation using weather data, optional occasion, and the authenticated user's saved preferences. The result is stored in recommendation history.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendationRequest"
+              },
+              "examples": {
+                "city": {
+                  "summary": "Recommendation by city",
+                  "value": {
+                    "city": "Vilnius",
+                    "occasion": "work"
+                  }
+                },
+                "coordinates": {
+                  "summary": "Recommendation by coordinates",
+                  "value": {
+                    "latitude": 54.6872,
+                    "longitude": 25.2797,
+                    "occasion": "walk"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated recommendation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponse"
+                },
+                "examples": {
+                  "recommendation": {
+                    "value": {
+                      "city": "Vilnius",
+                      "weatherSummary": "Temp: 12.4, Feels: 10.8, Condition: CLOUDS",
+                      "recommendation": "Wear a light waterproof jacket, a long-sleeve shirt, jeans, and closed shoes. Add a scarf if you are sensitive to wind."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGatewayError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/preferences": {
+      "get": {
+        "tags": [
+          "Preferences"
+        ],
+        "operationId": "getPreferences",
+        "summary": "Get current user's preferences",
+        "description": "Returns saved preferences. If the user has none, default preferences are created and returned.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current user's preferences.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferenceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Preferences"
+        ],
+        "operationId": "createPreferences",
+        "summary": "Create current user's preferences",
+        "description": "Creates or overwrites the authenticated user's preference profile. Missing optional fields receive defaults or keep existing values.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreferenceRequest"
+              },
+              "examples": {
+                "default": {
+                  "value": {
+                    "stylePreference": "CASUAL",
+                    "coldSensitivity": "MEDIUM",
+                    "heatSensitivity": "LOW",
+                    "windSensitivity": "HIGH",
+                    "rainSensitivity": "MEDIUM",
+                    "maxLayers": 3,
+                    "prefersHeadwear": true,
+                    "prefersWaterproof": true,
+                    "activityLevel": "MEDIUM",
+                    "preferredColors": "black, navy, grey",
+                    "avoidItems": "wool sweaters"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Preferences saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferenceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Preferences"
+        ],
+        "operationId": "updatePreferences",
+        "summary": "Update current user's preferences",
+        "description": "Updates the authenticated user's preference profile. If the profile does not exist, default preferences are created and then updated.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreferenceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Preferences updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferenceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/history": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "operationId": "getHistory",
+        "summary": "List current user's recommendation history",
+        "description": "Returns recommendations generated by the authenticated user, ordered from newest to oldest.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recommendation history list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "History"
+        ],
+        "operationId": "clearHistory",
+        "summary": "Clear current user's recommendation history",
+        "description": "Deletes all recommendation history rows owned by the authenticated user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "History cleared successfully. No response body is returned."
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/history/{id}": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "operationId": "getHistoryDetails",
+        "summary": "Get one recommendation history item",
+        "description": "Returns a single recommendation history item if it belongs to the authenticated user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Recommendation history identifier.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "example": 101
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recommendation history item.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/feedback": {
+      "post": {
+        "tags": [
+          "Feedback"
+        ],
+        "operationId": "createFeedback",
+        "summary": "Create feedback for a recommendation",
+        "description": "Adds feedback to one recommendation history item owned by the authenticated user. At least one of rating or non-blank comment is required.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackRequest"
+              },
+              "examples": {
+                "rating": {
+                  "value": {
+                    "recommendationHistoryId": 101,
+                    "feedbackType": "RATING",
+                    "rating": 5,
+                    "comment": "Useful recommendation for windy weather."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feedback created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Feedback"
+        ],
+        "operationId": "getFeedback",
+        "summary": "List current user's feedback",
+        "description": "Returns all feedback created by the authenticated user, ordered from newest to oldest.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/feedback/recommendations/{recommendationHistoryId}": {
+      "get": {
+        "tags": [
+          "Feedback"
+        ],
+        "operationId": "getRecommendationFeedback",
+        "summary": "List feedback for one recommendation",
+        "description": "Returns feedback for the selected recommendation history item if it belongs to the authenticated user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "recommendationHistoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "example": 101
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback for the selected recommendation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/feedback/{feedbackId}": {
+      "delete": {
+        "tags": [
+          "Feedback"
+        ],
+        "operationId": "deleteFeedback",
+        "summary": "Delete feedback",
+        "description": "Deletes one feedback item if it belongs to the authenticated user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "feedbackId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "example": 501
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Feedback deleted successfully. No response body is returned."
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/chat": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "sendChatMessage",
+        "summary": "Send a chat message",
+        "description": "Sends a message to the AI style assistant. If sessionId is omitted, a new chat session is created. If city is supplied, the prompt includes current weather for that city.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              },
+              "examples": {
+                "newSession": {
+                  "summary": "Start a new session",
+                  "value": {
+                    "message": "What should I wear for a long walk today?",
+                    "city": "Vilnius"
+                  }
+                },
+                "existingSession": {
+                  "summary": "Continue an existing session",
+                  "value": {
+                    "sessionId": 12,
+                    "message": "Can you make it more business casual?"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assistant response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                },
+                "examples": {
+                  "answer": {
+                    "value": {
+                      "sessionId": 12,
+                      "answer": "Choose a breathable base layer, a light jacket, comfortable trousers, and shoes with grip. Carry a compact umbrella if rain is likely.",
+                      "createdAt": "2026-04-30T12:45:00"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGatewayError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/chat/sessions": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "getChatSessions",
+        "summary": "List current user's chat sessions",
+        "description": "Returns chat sessions ordered by most recent update.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat sessions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatSessionResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/chat/sessions/{id}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "getChatSessionMessages",
+        "summary": "Get messages from a chat session",
+        "description": "Returns messages from one chat session if it belongs to the authenticated user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Chat session identifier.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "example": 12
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Messages in chronological order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatMessageDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "deleteChatSession",
+        "summary": "Delete a chat session",
+        "description": "Deletes a chat session if it belongs to the authenticated user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Chat session identifier.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "example": 12
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Chat session deleted successfully. No response body is returned."
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "operationId": "getHealth",
+        "summary": "Get service health",
+        "description": "Public endpoint for checking whether the backend process is running.",
+        "responses": {
+          "200": {
+            "description": "Service is running.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "examples": {
+                  "up": {
+                    "value": {
+                      "status": "UP",
+                      "service": "WeatherWear Backend",
+                      "timestamp": "2026-04-30T12:45:00"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT returned by /auth/register or /auth/login. Send it as Authorization: Bearer <token>."
+      }
+    },
+    "responses": {
+      "ValidationError": {
+        "description": "Request validation failed, a required parameter is missing, or the JSON body is malformed.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "validation": {
+                "value": {
+                  "timestamp": "2026-04-30T12:45:00",
+                  "status": 400,
+                  "error": "Bad Request",
+                  "message": "email: Email must be valid",
+                  "path": "/api/auth/register"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "description": "Authentication is missing, invalid, or expired.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "unauthorized": {
+                "value": {
+                  "timestamp": "2026-04-30T12:45:00",
+                  "status": 401,
+                  "error": "Unauthorized",
+                  "message": "Authentication is required",
+                  "path": "/api/preferences"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ForbiddenError": {
+        "description": "The authenticated user does not have permission for the requested operation.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "The requested resource was not found or does not belong to the authenticated user.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "notFound": {
+                "value": {
+                  "timestamp": "2026-04-30T12:45:00",
+                  "status": 404,
+                  "error": "Not Found",
+                  "message": "Recommendation history not found",
+                  "path": "/api/history/999"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ConflictError": {
+        "description": "The request conflicts with existing data or database constraints.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "duplicateUser": {
+                "value": {
+                  "timestamp": "2026-04-30T12:45:00",
+                  "status": 409,
+                  "error": "Conflict",
+                  "message": "User with email alex@example.com already exists",
+                  "path": "/api/auth/register"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BadGatewayError": {
+        "description": "An upstream dependency such as OpenWeather or the LLM provider failed.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "upstream": {
+                "value": {
+                  "timestamp": "2026-04-30T12:45:00",
+                  "status": 502,
+                  "error": "Bad Gateway",
+                  "message": "Failed to fetch weather data",
+                  "path": "/api/weather"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Unexpected server error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "serverError": {
+                "value": {
+                  "timestamp": "2026-04-30T12:45:00",
+                  "status": 500,
+                  "error": "Internal Server Error",
+                  "message": "Unexpected server error",
+                  "path": "/api/recommendations"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Unique user email.",
+            "example": "alex@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "format": "password",
+            "description": "Plain password submitted by the client. The backend stores only a BCrypt hash.",
+            "example": "securePass123"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "alex@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "securePass123"
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "required": [
+          "token",
+          "email",
+          "role"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "JWT access token.",
+            "example": "eyJhbGciOiJIUzI1NiJ9.example.signature"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "alex@example.com"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        }
+      },
+      "WeatherResponse": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "example": "Vilnius"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "example": 54.6872
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "example": 25.2797
+          },
+          "temperature": {
+            "type": "number",
+            "format": "double",
+            "description": "Temperature in Celsius.",
+            "example": 12.4
+          },
+          "feelsLike": {
+            "type": "number",
+            "format": "double",
+            "description": "Feels-like temperature in Celsius.",
+            "example": 10.8
+          },
+          "humidity": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Relative humidity percentage.",
+            "example": 71
+          },
+          "windSpeed": {
+            "type": "number",
+            "format": "double",
+            "description": "Wind speed in meters per second.",
+            "example": 4.6
+          },
+          "condition": {
+            "$ref": "#/components/schemas/WeatherCondition"
+          },
+          "precipitation": {
+            "type": "number",
+            "format": "double",
+            "description": "Precipitation volume from the upstream provider when available.",
+            "example": 0.0
+          },
+          "cached": {
+            "type": "boolean",
+            "description": "True when the response came from the local weather cache.",
+            "example": false
+          }
+        }
+      },
+      "RecommendationRequest": {
+        "type": "object",
+        "description": "Provide either a non-blank city or both latitude and longitude.",
+        "anyOf": [
+          {
+            "required": [
+              "city"
+            ]
+          },
+          {
+            "required": [
+              "latitude",
+              "longitude"
+            ]
+          }
+        ],
+        "properties": {
+          "city": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "City name used for weather lookup.",
+            "example": "Vilnius"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "minimum": -90,
+            "maximum": 90,
+            "example": 54.6872
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "minimum": -180,
+            "maximum": 180,
+            "example": 25.2797
+          },
+          "occasion": {
+            "type": "string",
+            "description": "Optional free-text context such as work, walk, date, or sport.",
+            "example": "work"
+          }
+        }
+      },
+      "RecommendationResponse": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "example": "Vilnius"
+          },
+          "weatherSummary": {
+            "type": "string",
+            "example": "Temp: 12.4, Feels: 10.8, Condition: CLOUDS"
+          },
+          "recommendation": {
+            "type": "string",
+            "example": "Wear a light waterproof jacket, jeans, and closed shoes."
+          }
+        }
+      },
+      "PreferenceRequest": {
+        "type": "object",
+        "required": [
+          "stylePreference",
+          "coldSensitivity",
+          "heatSensitivity"
+        ],
+        "properties": {
+          "stylePreference": {
+            "$ref": "#/components/schemas/StylePreference"
+          },
+          "coldSensitivity": {
+            "$ref": "#/components/schemas/SensitivityLevel"
+          },
+          "heatSensitivity": {
+            "$ref": "#/components/schemas/SensitivityLevel"
+          },
+          "windSensitivity": {
+            "$ref": "#/components/schemas/SensitivityLevel"
+          },
+          "rainSensitivity": {
+            "$ref": "#/components/schemas/SensitivityLevel"
+          },
+          "maxLayers": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 3
+          },
+          "prefersHeadwear": {
+            "type": "boolean",
+            "example": true
+          },
+          "prefersWaterproof": {
+            "type": "boolean",
+            "example": true
+          },
+          "activityLevel": {
+            "$ref": "#/components/schemas/ActivityLevel"
+          },
+          "preferredColors": {
+            "type": "string",
+            "example": "black, navy, grey"
+          },
+          "avoidItems": {
+            "type": "string",
+            "example": "wool sweaters"
+          }
+        }
+      },
+      "PreferenceResponse": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64",
+                "example": 7
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/PreferenceRequest"
+          }
+        ]
+      },
+      "HistoryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 101
+          },
+          "city": {
+            "type": "string",
+            "example": "Vilnius"
+          },
+          "weatherSummary": {
+            "type": "string",
+            "example": "Temp: 12.4, Feels: 10.8, Condition: CLOUDS"
+          },
+          "recommendationText": {
+            "type": "string",
+            "example": "Wear a light waterproof jacket and closed shoes."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-30T12:45:00"
+          }
+        }
+      },
+      "FeedbackRequest": {
+        "type": "object",
+        "required": [
+          "recommendationHistoryId"
+        ],
+        "description": "At least one of rating or non-blank comment is required.",
+        "properties": {
+          "recommendationHistoryId": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "example": 101
+          },
+          "feedbackType": {
+            "$ref": "#/components/schemas/FeedbackType"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          },
+          "comment": {
+            "type": "string",
+            "example": "Useful recommendation for windy weather."
+          }
+        }
+      },
+      "FeedbackResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 501
+          },
+          "recommendationHistoryId": {
+            "type": "integer",
+            "format": "int64",
+            "example": 101
+          },
+          "feedbackType": {
+            "$ref": "#/components/schemas/FeedbackType"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          },
+          "comment": {
+            "type": "string",
+            "example": "Useful recommendation for windy weather."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-30T12:45:00"
+          }
+        }
+      },
+      "ChatRequest": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Existing chat session ID. Omit to start a new session.",
+            "example": 12
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000,
+            "example": "What should I wear for a long walk today?"
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Optional city used to add current weather context to the prompt.",
+            "example": "Vilnius"
+          }
+        }
+      },
+      "ChatResponse": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "integer",
+            "format": "int64",
+            "example": 12
+          },
+          "answer": {
+            "type": "string",
+            "example": "Choose a breathable base layer, a light jacket, comfortable trousers, and shoes with grip."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-30T12:45:00"
+          }
+        }
+      },
+      "ChatSessionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 12
+          },
+          "title": {
+            "type": "string",
+            "example": "Style chat"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-30T12:40:00"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-30T12:45:00"
+          }
+        }
+      },
+      "ChatMessageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 9001
+          },
+          "role": {
+            "$ref": "#/components/schemas/ChatRole"
+          },
+          "content": {
+            "type": "string",
+            "example": "What should I wear for a long walk today?"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-30T12:45:00"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "UP"
+          },
+          "service": {
+            "type": "string",
+            "example": "WeatherWear Backend"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-30T12:45:00"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "timestamp",
+          "status",
+          "error",
+          "message",
+          "path"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-30T12:45:00"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "example": "Bad Request"
+          },
+          "message": {
+            "type": "string",
+            "example": "email: Email must be valid"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/auth/register"
+          }
+        }
+      },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "USER",
+          "ADMIN"
+        ],
+        "example": "USER"
+      },
+      "WeatherCondition": {
+        "type": "string",
+        "enum": [
+          "CLEAR",
+          "CLOUDS",
+          "RAIN",
+          "DRIZZLE",
+          "THUNDERSTORM",
+          "SNOW",
+          "MIST",
+          "FOG",
+          "WIND",
+          "UNKNOWN"
+        ],
+        "example": "CLOUDS"
+      },
+      "StylePreference": {
+        "type": "string",
+        "enum": [
+          "CASUAL",
+          "BUSINESS",
+          "SPORTY",
+          "STREETWEAR",
+          "ELEGANT",
+          "MINIMALIST"
+        ],
+        "example": "CASUAL"
+      },
+      "SensitivityLevel": {
+        "type": "string",
+        "enum": [
+          "LOW",
+          "MEDIUM",
+          "HIGH"
+        ],
+        "example": "MEDIUM"
+      },
+      "ActivityLevel": {
+        "type": "string",
+        "enum": [
+          "LOW",
+          "MEDIUM",
+          "HIGH"
+        ],
+        "example": "MEDIUM"
+      },
+      "FeedbackType": {
+        "type": "string",
+        "enum": [
+          "RATING",
+          "LIKE",
+          "DISLIKE",
+          "COMMENT"
+        ],
+        "example": "RATING"
+      },
+      "ChatRole": {
+        "type": "string",
+        "enum": [
+          "USER",
+          "ASSISTANT",
+          "SYSTEM"
+        ],
+        "example": "ASSISTANT"
+      }
+    }
+  }
+}

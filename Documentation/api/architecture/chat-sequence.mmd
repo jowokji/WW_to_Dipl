@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant Client
+    participant API as ChatController
+    participant Service as ChatService
+    participant DB as PostgreSQL
+    participant Weather as WeatherService
+    participant LLM as LlmClient
+
+    Client->>API: POST /api/chat with Bearer token
+    API->>Service: sendMessage(request)
+    Service->>DB: get or create chat session
+    Service->>DB: save USER message
+    opt city supplied
+        Service->>Weather: fetch current weather context
+    end
+    Service->>DB: load last 10 messages
+    Service->>LLM: generate assistant answer
+    Service->>DB: save ASSISTANT message and update session
+    Service-->>API: ChatResponse
+    API-->>Client: 200 ChatResponse
+

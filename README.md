@@ -9,6 +9,8 @@ WeatherWear backend for a diploma project.
 - Database schema migrations: `src/main/resources/db/migration`
 - Database documentation: `Documentation/database_documentation.md`
 - Database logical schema: `Documentation/database_schema.mmd`
+- API documentation: `Documentation/api/README.md`
+- API OpenAPI specification: `Documentation/api/openapi/weatherwear-api.openapi.json`
 - Database roles script: `src/main/resources/db/security/roles_and_grants.sql`
 - Database test data: `src/main/resources/db/testdata/weatherwear_test_data.sql`
 

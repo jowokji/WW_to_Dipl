@@ -83,7 +83,7 @@ public class WeatherApiClient {
             throw new WeatherApiException("Weather API URL is not configured");
         }
 
-        if (!StringUtils.hasText(apiKey) || "your-weather-api-key".equals(apiKey)) {
+        if (!StringUtils.hasText(apiKey)) {
             throw new WeatherApiException("Weather API key is not configured");
         }
     }

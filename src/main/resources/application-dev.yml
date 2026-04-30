@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/weatherwear
     username: weatherwear_user
-    password: weatherwear_password
+    password: ${PGPASSWORD:}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -17,15 +17,15 @@ spring:
     enabled: false
 
 jwt:
-  secret: "this-is-a-very-long-secret-key-for-weatherwear-jwt-authentication"
+  secret: ${JWT_SECRET:}
   expiration: 86400000
 
 weather:
   api:
-    key: ""
+    key: ${WEATHER_API_KEY:}
     url: "https://api.openweathermap.org/data/2.5/weather"
 
 llm:
   api:
-    key: ""
+    key: ${LLM_API_KEY:}
     url: "https://api.openai.com/v1/chat/completions"

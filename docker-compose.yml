@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: weatherwear
       POSTGRES_USER: weatherwear_user
-      POSTGRES_PASSWORD: weatherwear_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     ports:
       - "5433:5432"
     volumes:
@@ -28,15 +28,15 @@ services:
       PGPORT: 5432
       PGDATABASE: weatherwear
       PGUSER: weatherwear_user
-      PGPASSWORD: weatherwear_password
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
 
-      JWT_SECRET: this-is-a-very-long-secret-key-for-weatherwear-jwt-authentication
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       JWT_EXPIRATION: 86400000
 
-      WEATHER_API_KEY: your_openweather_api_key
+      WEATHER_API_KEY: ${WEATHER_API_KEY:?WEATHER_API_KEY is required}
       WEATHER_API_URL: https://api.openweathermap.org/data/2.5/weather
 
-      LLM_API_KEY: your_llm_api_key
+      LLM_API_KEY: ${LLM_API_KEY:?LLM_API_KEY is required}
       LLM_API_URL: https://api.openai.com/v1/chat/completions
 
 volumes:

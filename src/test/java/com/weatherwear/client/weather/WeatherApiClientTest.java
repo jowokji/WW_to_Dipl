@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -80,7 +79,7 @@ class WeatherApiClientTest {
 
     @Test
     void getWeatherByCity_missingApiKey_throwsException() {
-        ReflectionTestUtils.setField(weatherApiClient, "apiKey", "your-weather-api-key");
+        ReflectionTestUtils.setField(weatherApiClient, "apiKey", "");
 
         assertThatThrownBy(() -> weatherApiClient.getWeatherByCity("Vilnius"))
                 .isInstanceOf(WeatherApiException.class)

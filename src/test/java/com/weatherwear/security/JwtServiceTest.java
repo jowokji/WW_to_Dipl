@@ -12,16 +12,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JwtServiceTest {
 
+    private static final String TEST_JWT_SECRET = "a".repeat(64);
+
     private JwtService jwtService;
 
     @BeforeEach
     void setUp() {
         jwtService = new JwtService();
-        ReflectionTestUtils.setField(
-                jwtService,
-                "jwtSecret",
-                "this-is-a-very-long-secret-key-for-weatherwear-tests"
-        );
+        ReflectionTestUtils.setField(jwtService, "jwtSecret", TEST_JWT_SECRET);
         ReflectionTestUtils.setField(jwtService, "jwtExpiration", 3_600_000L);
     }
 

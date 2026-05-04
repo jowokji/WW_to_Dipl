@@ -18,6 +18,7 @@ Authorization: Bearer <jwt-token>
 | --- | --- | --- | --- | --- |
 | POST | `/auth/register` | Create user account and issue JWT | No | 201 |
 | POST | `/auth/login` | Authenticate user and issue JWT | No | 200 |
+| DELETE | `/users/me` | Delete current account and associated user-owned data | Yes | 204 |
 | GET | `/weather?city={city}` | Get current weather by city | Yes | 200 |
 | GET | `/weather/coordinates?lat={lat}&lon={lon}` | Get current weather by coordinates | Yes | 200 |
 | POST | `/recommendations` | Generate and save clothing recommendation | Yes | 200 |
@@ -80,6 +81,16 @@ Request:
 Success response `200 OK`: same structure as registration.
 
 Common errors: `400` invalid request body, `401` invalid email or password.
+
+## Account
+
+### DELETE `/users/me`
+
+Deletes the authenticated user account and returns `204 No Content`.
+
+The database schema uses `ON DELETE CASCADE` for user-owned preferences, recommendation history, feedback, chat sessions, and chat messages. After deletion, the previously issued JWT can no longer resolve to a user.
+
+Common errors: `401` missing or invalid JWT.
 
 ## Weather
 

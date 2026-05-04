@@ -5,6 +5,7 @@ import com.weatherwear.exception.UserNotFoundException;
 import com.weatherwear.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,5 +29,10 @@ public class UserService {
 
     public User save(User user) {
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteAccount(User user) {
+        userRepository.delete(user);
     }
 }

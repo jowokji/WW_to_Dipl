@@ -43,6 +43,7 @@ Documentation/api/openapi/weatherwear-api.openapi.json
 | Area | Included endpoints | Authentication |
 | --- | --- | --- |
 | Authentication | Register, login | Public |
+| Account | Delete current account and associated user-owned data | JWT required |
 | Weather | Lookup by city, lookup by coordinates | JWT required |
 | Recommendations | Generate AI clothing recommendation | JWT required |
 | Preferences | Read, create, update user preferences | JWT required |
@@ -78,6 +79,7 @@ Documentation/api/openapi/weatherwear-api.openapi.json
 | Documentation strategy | `strategy/documentation-strategy.md` |
 | Versioning and changelog | `reference/versioning-and-limits.md`, `strategy/changelog.md` |
 | Validation report | `strategy/validation.md` |
+| AI safety and prompt documentation | `../ai_safety.md` |
 
 ## Known Gaps
 

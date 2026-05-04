@@ -59,6 +59,7 @@ This checklist maps the diploma API documentation requirements to the WeatherWea
 WeatherWear documentation includes the following concrete project areas:
 
 - JWT user registration and login.
+- Authenticated user account deletion and associated data deletion.
 - Authenticated weather lookup by city or coordinates.
 - AI recommendation generation with saved history.
 - User preference management.
@@ -68,4 +69,3 @@ WeatherWear documentation includes the following concrete project areas:
 - Health check endpoint.
 - OpenWeather and LLM provider dependency behavior.
 - PostgreSQL-backed resource ownership and current-user access rules.
-

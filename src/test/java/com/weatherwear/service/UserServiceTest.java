@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,6 +75,15 @@ class UserServiceTest {
         when(userRepository.save(user)).thenReturn(user);
 
         assertThat(userService.save(user)).isSameAs(user);
+    }
+
+    @Test
+    void deleteAccount_delegatesToRepository() {
+        User user = user();
+
+        userService.deleteAccount(user);
+
+        verify(userRepository).delete(user);
     }
 
     private User user() {

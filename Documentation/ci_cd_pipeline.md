@@ -21,7 +21,7 @@ Code checks verify formatting with Spotless and lint Java sources with Checkstyl
 
 Build runs `mvn -B clean compile`. This checks that the Spring Boot backend compiles with Java 17.
 
-Testing runs `mvn -B test`. These are unit and controller tests, and JaCoCo generates the coverage report.
+Testing runs `mvn -B test`. These are unit and controller tests, and JaCoCo generates the coverage report. The project also configures `jacoco:check` in the Maven `verify` lifecycle with a 70% instruction coverage threshold.
 
 Artifact creation runs `mvn -B package -DskipTests`, builds the executable Spring Boot JAR, builds a Docker image, saves it as a `.tar`, and uploads both as GitHub Actions artifacts.
 
@@ -40,4 +40,4 @@ Dev is represented by local development and pull requests. It runs code checks, 
 
 Test is represented by the GitHub Actions `test` job. It runs automated unit/controller tests and produces the JaCoCo coverage report.
 
-Production is Railway. Deployment is manual from GitHub Actions and requires the `RAILWAY_DEPLOY_HOOK_URL` secret.
+Production is Railway. Deployment is manual from GitHub Actions and requires the `RAILWAY_DEPLOY_HOOK_URL` secret. The production Swagger URL should be verified after each deploy at `https://wwtodipl-production.up.railway.app/api/swagger-ui.html` or the value configured through `OPENAPI_SERVER_URL`.

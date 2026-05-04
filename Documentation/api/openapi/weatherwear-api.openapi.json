@@ -25,6 +25,10 @@
       "description": "Registration and login endpoints that issue JWT access tokens."
     },
     {
+      "name": "Account",
+      "description": "Authenticated account lifecycle endpoints, including user data deletion."
+    },
+    {
       "name": "Weather",
       "description": "Authenticated weather lookup endpoints backed by OpenWeather and a 30-minute cache."
     },
@@ -161,6 +165,32 @@
           },
           "400": {
             "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "delete": {
+        "tags": [
+          "Account"
+        ],
+        "operationId": "deleteCurrentUser",
+        "summary": "Delete current user account",
+        "description": "Deletes the authenticated user account. Database foreign keys cascade the user's preferences, recommendation history, feedback, chat sessions, and chat messages.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Account and associated user-owned data deleted successfully. No response body is returned."
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"

@@ -29,6 +29,8 @@ The JWT secret must be long enough for HS256 signing.
 docker compose up -d postgres
 ```
 
+If PostgreSQL was already initialized with another `APP_DB_PASSWORD`, changing `.env` will not update the existing database user password. Reuse the original password or intentionally recreate the local Docker volume before testing with new credentials.
+
 ## Run the Backend
 
 ```bash
@@ -88,4 +90,3 @@ Expected result:
 ## Next Steps
 
 Continue with `integration-tutorial.md` for a complete workflow: authenticate, save preferences, generate a recommendation, review history, and submit feedback.
-

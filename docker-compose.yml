@@ -40,5 +40,7 @@ services:
       LLM_API_KEY: ${LLM_API_KEY:?LLM_API_KEY is required}
       LLM_API_URL: https://api.openai.com/v1/chat/completions
 
+      OPENAPI_SERVER_URL: ${OPENAPI_SERVER_URL:-http://localhost:8090/api}
+
 volumes:
   weatherwear_postgres_data:

@@ -1,14 +1,8 @@
 package com.weatherwear.mobile;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Typeface;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
 
-    private static final int LOCATION_PERMISSION_REQUEST = 44;
     private static final String PREFS = "weatherwear";
     private static final String KEY_TOKEN = "jwt";
     private static final String KEY_BASE_URL = "baseUrl";
@@ -37,22 +30,29 @@ public class MainActivity extends Activity {
 
     private ApiClient apiClient;
     private SharedPreferences preferences;
+    private String token;
+    private Long chatSessionId;
 
     private EditText baseUrlInput;
     private EditText emailInput;
     private EditText passwordInput;
-    private EditText cityInput;
+    private EditText weatherCityInput;
+    private EditText recommendationCityInput;
     private EditText occasionInput;
-    private EditText chatCityInput;
     private EditText chatMessageInput;
+
     private TextView statusView;
-    private TextView outputView;
-    private LinearLayout authPanel;
-    private LinearLayout forecastPanel;
-    private LinearLayout chatPanel;
-    private LinearLayout historyPanel;
-    private Long chatSessionId;
-    private String token;
+    private TextView authOutput;
+    private TextView weatherOutput;
+    private TextView recommendationOutput;
+    private TextView chatOutput;
+    private TextView historyOutput;
+
+    private LinearLayout loginScreen;
+    private LinearLayout weatherScreen;
+    private LinearLayout recommendationScreen;
+    private LinearLayout chatScreen;
+    private LinearLayout historyScreen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,20 +64,18 @@ public class MainActivity extends Activity {
 
         buildUi();
         updateStatus();
-        showPanel(authPanel);
+        showScreen(loginScreen);
     }
 
     private void buildUi() {
         ScrollView scrollView = new ScrollView(this);
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout root = verticalLayout();
         root.setPadding(dp(18), dp(18), dp(18), dp(24));
         scrollView.addView(root);
 
-        TextView title = title("WeatherWear");
-        root.addView(title);
+        root.addView(title("WeatherWear MVP"));
 
-        statusView = label("");
+        statusView = text("");
         root.addView(statusView);
 
         baseUrlInput = input("Backend URL", false);
@@ -86,105 +84,111 @@ public class MainActivity extends Activity {
 
         root.addView(navigation());
 
-        authPanel = panel();
-        forecastPanel = panel();
-        chatPanel = panel();
-        historyPanel = panel();
+        loginScreen = screen("Login / Register");
+        weatherScreen = screen("Home / Weather");
+        recommendationScreen = screen("Recommendation");
+        chatScreen = screen("Chat");
+        historyScreen = screen("History");
 
-        buildAuthPanel();
-        buildForecastPanel();
-        buildChatPanel();
-        buildHistoryPanel();
+        buildLoginScreen();
+        buildWeatherScreen();
+        buildRecommendationScreen();
+        buildChatScreen();
+        buildHistoryScreen();
 
-        root.addView(authPanel);
-        root.addView(forecastPanel);
-        root.addView(chatPanel);
-        root.addView(historyPanel);
-
-        outputView = label("");
-        outputView.setTypeface(Typeface.MONOSPACE);
-        outputView.setTextIsSelectable(true);
-        root.addView(outputView);
+        root.addView(loginScreen);
+        root.addView(weatherScreen);
+        root.addView(recommendationScreen);
+        root.addView(chatScreen);
+        root.addView(historyScreen);
 
         setContentView(scrollView);
     }
 
     private View navigation() {
-        HorizontalScrollView scroller = new HorizontalScrollView(this);
+        HorizontalScrollView scrollView = new HorizontalScrollView(this);
         LinearLayout navigation = new LinearLayout(this);
         navigation.setOrientation(LinearLayout.HORIZONTAL);
         navigation.setPadding(0, dp(8), 0, dp(8));
 
-        navigation.addView(button("Auth", () -> showPanel(authPanel)));
-        navigation.addView(button("Forecast", () -> showPanel(forecastPanel)));
-        navigation.addView(button("Chat", () -> showPanel(chatPanel)));
-        navigation.addView(button("History", () -> showPanel(historyPanel)));
-        navigation.addView(button("Delete account", this::deleteAccount));
+        navigation.addView(button("Login", () -> showScreen(loginScreen)));
+        navigation.addView(button("Weather", () -> showScreen(weatherScreen)));
+        navigation.addView(button("Recommendation", () -> showScreen(recommendationScreen)));
+        navigation.addView(button("Chat", () -> showScreen(chatScreen)));
+        navigation.addView(button("History", () -> showScreen(historyScreen)));
 
-        scroller.addView(navigation);
-        return scroller;
+        scrollView.addView(navigation);
+        return scrollView;
     }
 
-    private void buildAuthPanel() {
-        authPanel.addView(section("Account"));
+    private void buildLoginScreen() {
         emailInput = input("Email", false);
         passwordInput = input("Password", true);
-        authPanel.addView(emailInput);
-        authPanel.addView(passwordInput);
-        authPanel.addView(button("Register", this::register));
-        authPanel.addView(button("Login", this::login));
-        authPanel.addView(button("Clear token", this::clearToken));
+        authOutput = output();
+
+        loginScreen.addView(emailInput);
+        loginScreen.addView(passwordInput);
+        loginScreen.addView(button("Register", this::register));
+        loginScreen.addView(button("Login", this::login));
+        loginScreen.addView(button("Clear token", this::clearToken));
+        loginScreen.addView(authOutput);
     }
 
-    private void buildForecastPanel() {
-        forecastPanel.addView(section("Forecast and recommendation"));
-        cityInput = input("City, for example Vilnius", false);
-        occasionInput = input("Occasion, for example work or walk", false);
-        forecastPanel.addView(cityInput);
-        forecastPanel.addView(occasionInput);
-        forecastPanel.addView(button("Get weather by city", this::getWeatherByCity));
-        forecastPanel.addView(button("Use current location", this::getWeatherByLocation));
-        forecastPanel.addView(button("Generate recommendation", this::recommend));
+    private void buildWeatherScreen() {
+        weatherCityInput = input("City", false);
+        weatherOutput = output();
+
+        weatherScreen.addView(weatherCityInput);
+        weatherScreen.addView(button("Get weather", this::getWeather));
+        weatherScreen.addView(weatherOutput);
     }
 
-    private void buildChatPanel() {
-        chatPanel.addView(section("Style chat"));
-        chatCityInput = input("Optional city context", false);
+    private void buildRecommendationScreen() {
+        recommendationCityInput = input("City", false);
+        occasionInput = input("Occasion, for example walk or work", false);
+        recommendationOutput = output();
+
+        recommendationScreen.addView(recommendationCityInput);
+        recommendationScreen.addView(occasionInput);
+        recommendationScreen.addView(button("Get recommendation", this::getRecommendation));
+        recommendationScreen.addView(recommendationOutput);
+    }
+
+    private void buildChatScreen() {
         chatMessageInput = input("Message", false);
-        chatPanel.addView(chatCityInput);
-        chatPanel.addView(chatMessageInput);
-        chatPanel.addView(button("Send message", this::sendChatMessage));
-        chatPanel.addView(button("New chat", () -> {
+        chatOutput = output();
+
+        chatScreen.addView(chatMessageInput);
+        chatScreen.addView(button("Send", this::sendChatMessage));
+        chatScreen.addView(button("New chat", () -> {
             chatSessionId = null;
-            output("Started a new chat session.");
+            chatOutput.setText("New chat started.");
         }));
+        chatScreen.addView(chatOutput);
     }
 
-    private void buildHistoryPanel() {
-        historyPanel.addView(section("History"));
-        historyPanel.addView(button("Load recommendation history", this::loadHistory));
+    private void buildHistoryScreen() {
+        historyOutput = output();
+
+        historyScreen.addView(button("Load history", this::loadHistory));
+        historyScreen.addView(button("Clear history", this::clearHistory));
+        historyScreen.addView(historyOutput);
     }
 
     private void register() {
-        JSONObject body = authBody();
-        postAuth("/auth/register", body);
+        postAuth("/auth/register");
     }
 
     private void login() {
-        JSONObject body = authBody();
-        postAuth("/auth/login", body);
+        postAuth("/auth/login");
     }
 
-    private JSONObject authBody() {
+    private void postAuth(String path) {
         JSONObject body = new JSONObject();
         put(body, "email", emailInput.getText().toString().trim());
         put(body, "password", passwordInput.getText().toString());
-        return body;
-    }
 
-    private void postAuth(String path, JSONObject body) {
-        saveBaseUrl();
-        output("Connecting...");
+        authOutput.setText("Connecting...");
 
         api("POST", path, body, new ApiCallback() {
             @Override
@@ -194,125 +198,93 @@ public class MainActivity extends Activity {
                     token = json.optString("token", "");
                     preferences.edit().putString(KEY_TOKEN, token).apply();
                     updateStatus();
-                    output("Authenticated as " + json.optString("email"));
+                    authOutput.setText("JWT saved for " + json.optString("email"));
                 } catch (Exception ex) {
-                    output("Authentication response error: " + ex.getMessage());
+                    authOutput.setText("Authentication response error: " + ex.getMessage());
                 }
             }
 
             @Override
             public void onError(String message) {
-                output(message);
+                authOutput.setText(message);
             }
         });
     }
 
-    private void getWeatherByCity() {
-        String city = cityInput.getText().toString().trim();
+    private void getWeather() {
+        String city = weatherCityInput.getText().toString().trim();
         if (city.isEmpty()) {
-            output("Enter a city first.");
+            weatherOutput.setText("Enter a city first.");
             return;
         }
 
-        String path = "/weather?city=" + encode(city);
-        api("GET", path, null, simpleJsonOutput("Weather"));
-    }
-
-    private void getWeatherByLocation() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(
-                    new String[]{
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                    },
-                    LOCATION_PERMISSION_REQUEST
-            );
-            return;
-        }
-
-        fetchWeatherFromLastKnownLocation();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(
-            int requestCode,
-            String[] permissions,
-            int[] grantResults
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == LOCATION_PERMISSION_REQUEST
-                && grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            fetchWeatherFromLastKnownLocation();
-        } else {
-            output("Location permission was not granted.");
-        }
-    }
-
-    private void fetchWeatherFromLastKnownLocation() {
-        LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Location location = null;
-
-        try {
-            location = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (location == null) {
-                location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        api("GET", "/weather?city=" + encode(city), null, new ApiCallback() {
+            @Override
+            public void onSuccess(String response) {
+                try {
+                    JSONObject json = new JSONObject(response);
+                    String result = "City: " + json.optString("city") + "\n"
+                            + "Temperature: " + json.optDouble("temperature") + " C\n"
+                            + "Wind: " + json.optDouble("windSpeed") + " m/s\n"
+                            + "Humidity: " + json.optInt("humidity") + "%\n"
+                            + "Condition: " + json.optString("condition");
+                    weatherOutput.setText(result);
+                } catch (Exception ex) {
+                    weatherOutput.setText("Weather response error: " + ex.getMessage());
+                }
             }
-        } catch (SecurityException ex) {
-            output("Location permission is required.");
-            return;
-        }
 
-        if (location == null) {
-            output("No last known location is available yet.");
-            return;
-        }
-
-        String path = "/weather/coordinates?lat="
-                + location.getLatitude()
-                + "&lon="
-                + location.getLongitude();
-        api("GET", path, null, simpleJsonOutput("Weather"));
+            @Override
+            public void onError(String message) {
+                weatherOutput.setText(message);
+            }
+        });
     }
 
-    private void recommend() {
-        JSONObject body = new JSONObject();
-        String city = cityInput.getText().toString().trim();
+    private void getRecommendation() {
+        String city = recommendationCityInput.getText().toString().trim();
         String occasion = occasionInput.getText().toString().trim();
 
         if (city.isEmpty()) {
-            output("Enter a city for the recommendation.");
+            recommendationOutput.setText("Enter a city first.");
             return;
         }
 
+        JSONObject body = new JSONObject();
         put(body, "city", city);
         if (!occasion.isEmpty()) {
             put(body, "occasion", occasion);
         }
 
-        api("POST", "/recommendations", body, simpleJsonOutput("Recommendation"));
+        api("POST", "/recommendations", body, new ApiCallback() {
+            @Override
+            public void onSuccess(String response) {
+                try {
+                    JSONObject json = new JSONObject(response);
+                    recommendationOutput.setText(json.optString("recommendation"));
+                } catch (Exception ex) {
+                    recommendationOutput.setText("Recommendation response error: " + ex.getMessage());
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                recommendationOutput.setText(message);
+            }
+        });
     }
 
     private void sendChatMessage() {
         String message = chatMessageInput.getText().toString().trim();
         if (message.isEmpty()) {
-            output("Enter a chat message first.");
+            chatOutput.setText("Enter a message first.");
             return;
         }
 
         JSONObject body = new JSONObject();
         put(body, "message", message);
-
         if (chatSessionId != null) {
             put(body, "sessionId", chatSessionId);
-        }
-
-        String city = chatCityInput.getText().toString().trim();
-        if (!city.isEmpty()) {
-            put(body, "city", city);
         }
 
         api("POST", "/chat", body, new ApiCallback() {
@@ -321,15 +293,15 @@ public class MainActivity extends Activity {
                 try {
                     JSONObject json = new JSONObject(response);
                     chatSessionId = json.optLong("sessionId");
-                    output("Assistant:\n" + json.optString("answer"));
+                    chatOutput.setText(json.optString("answer"));
                 } catch (Exception ex) {
-                    output("Chat response error: " + ex.getMessage());
+                    chatOutput.setText("Chat response error: " + ex.getMessage());
                 }
             }
 
             @Override
             public void onError(String message) {
-                output(message);
+                chatOutput.setText(message);
             }
         });
     }
@@ -347,35 +319,36 @@ public class MainActivity extends Activity {
                         builder.append(item.optString("createdAt"))
                                 .append("\n")
                                 .append(item.optString("city"))
-                                .append(": ")
+                                .append("\n")
                                 .append(item.optString("recommendationText"))
                                 .append("\n\n");
                     }
 
-                    output(builder.length() == 0 ? "History is empty." : builder.toString());
+                    historyOutput.setText(builder.length() == 0
+                            ? "History is empty."
+                            : builder.toString());
                 } catch (Exception ex) {
-                    output("History response error: " + ex.getMessage());
+                    historyOutput.setText("History response error: " + ex.getMessage());
                 }
             }
 
             @Override
             public void onError(String message) {
-                output(message);
+                historyOutput.setText(message);
             }
         });
     }
 
-    private void deleteAccount() {
-        api("DELETE", "/users/me", null, new ApiCallback() {
+    private void clearHistory() {
+        api("DELETE", "/history", null, new ApiCallback() {
             @Override
             public void onSuccess(String response) {
-                clearToken();
-                output("Account and associated data were deleted.");
+                historyOutput.setText("History cleared.");
             }
 
             @Override
             public void onError(String message) {
-                output(message);
+                historyOutput.setText(message);
             }
         });
     }
@@ -384,7 +357,7 @@ public class MainActivity extends Activity {
         token = "";
         preferences.edit().remove(KEY_TOKEN).apply();
         updateStatus();
-        output("Token cleared.");
+        authOutput.setText("Token cleared.");
     }
 
     private void api(String method, String path, JSONObject body, ApiCallback callback) {
@@ -399,20 +372,6 @@ public class MainActivity extends Activity {
         );
     }
 
-    private ApiCallback simpleJsonOutput(String label) {
-        return new ApiCallback() {
-            @Override
-            public void onSuccess(String response) {
-                output(label + ":\n" + response);
-            }
-
-            @Override
-            public void onError(String message) {
-                output(message);
-            }
-        };
-    }
-
     private void saveBaseUrl() {
         preferences.edit()
                 .putString(KEY_BASE_URL, baseUrlInput.getText().toString().trim())
@@ -424,40 +383,56 @@ public class MainActivity extends Activity {
         statusView.setText(authenticated ? "JWT token saved" : "Not authenticated");
     }
 
-    private void showPanel(LinearLayout visiblePanel) {
-        authPanel.setVisibility(visiblePanel == authPanel ? View.VISIBLE : View.GONE);
-        forecastPanel.setVisibility(visiblePanel == forecastPanel ? View.VISIBLE : View.GONE);
-        chatPanel.setVisibility(visiblePanel == chatPanel ? View.VISIBLE : View.GONE);
-        historyPanel.setVisibility(visiblePanel == historyPanel ? View.VISIBLE : View.GONE);
+    private void showScreen(LinearLayout visibleScreen) {
+        loginScreen.setVisibility(visibleScreen == loginScreen ? View.VISIBLE : View.GONE);
+        weatherScreen.setVisibility(visibleScreen == weatherScreen ? View.VISIBLE : View.GONE);
+        recommendationScreen.setVisibility(
+                visibleScreen == recommendationScreen ? View.VISIBLE : View.GONE
+        );
+        chatScreen.setVisibility(visibleScreen == chatScreen ? View.VISIBLE : View.GONE);
+        historyScreen.setVisibility(visibleScreen == historyScreen ? View.VISIBLE : View.GONE);
     }
 
-    private LinearLayout panel() {
-        LinearLayout panel = new LinearLayout(this);
-        panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(0, dp(8), 0, dp(8));
-        return panel;
+    private LinearLayout screen(String title) {
+        LinearLayout layout = verticalLayout();
+        layout.setPadding(0, dp(8), 0, dp(8));
+        layout.addView(section(title));
+        return layout;
     }
 
-    private TextView title(String text) {
-        TextView view = label(text);
+    private LinearLayout verticalLayout() {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        return layout;
+    }
+
+    private TextView title(String value) {
+        TextView view = text(value);
         view.setTextSize(28);
         view.setTypeface(Typeface.DEFAULT_BOLD);
         return view;
     }
 
-    private TextView section(String text) {
-        TextView view = label(text);
+    private TextView section(String value) {
+        TextView view = text(value);
         view.setTextSize(20);
         view.setTypeface(Typeface.DEFAULT_BOLD);
         view.setPadding(0, dp(12), 0, dp(6));
         return view;
     }
 
-    private TextView label(String text) {
+    private TextView text(String value) {
         TextView view = new TextView(this);
-        view.setText(text);
+        view.setText(value);
         view.setTextSize(15);
         view.setPadding(0, dp(6), 0, dp(6));
+        return view;
+    }
+
+    private TextView output() {
+        TextView view = text("");
+        view.setTypeface(Typeface.MONOSPACE);
+        view.setTextIsSelectable(true);
         return view;
     }
 
@@ -480,15 +455,10 @@ public class MainActivity extends Activity {
         return button;
     }
 
-    private void output(String text) {
-        outputView.setText(text == null ? "" : text);
-    }
-
     private void put(JSONObject json, String key, Object value) {
         try {
             json.put(key, value);
         } catch (Exception ignored) {
-            output("Failed to build request.");
         }
     }
 

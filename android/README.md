@@ -4,14 +4,11 @@ This folder contains a minimal native Android client written in Java. It is inte
 
 ## Features
 
-- Register and log in with JWT.
-- Save a backend base URL.
-- Request weather by city.
-- Request weather from the device's last known location.
-- Generate clothing recommendations.
-- Send messages to the AI style chat.
-- Load recommendation history.
-- Delete the current account through `DELETE /users/me`.
+- Login / Register: email/password, JWT retrieval, token persistence.
+- Home / Weather: city input, `Get weather`, temperature, wind, humidity, and condition output.
+- Recommendation: city plus occasion, `Get recommendation`, LLM answer output.
+- Chat: message input, `Send`, assistant answer output.
+- History: previous recommendations list and `Clear history`.
 
 ## Run Locally
 

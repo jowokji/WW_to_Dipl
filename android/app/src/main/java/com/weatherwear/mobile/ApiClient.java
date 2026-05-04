@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 final class ApiClient {
 
     private static final int TIMEOUT_MS = 15000;
+    private static final String DEFAULT_BASE_URL = "http://10.0.2.2:8090/api";
 
     private final Handler handler;
 
@@ -74,7 +75,7 @@ final class ApiClient {
             if (status >= 200 && status < 300) {
                 postSuccess(callback, responseBody);
             } else {
-                postError(callback, "HTTP " + status + ": " + responseBody);
+                postError(callback, formatError(status, responseBody));
             }
         } catch (Exception ex) {
             postError(callback, ex.getMessage() != null ? ex.getMessage() : "Network error");
@@ -87,7 +88,7 @@ final class ApiClient {
 
     private String normalizeBaseUrl(String baseUrl) {
         String value = baseUrl == null || baseUrl.trim().isEmpty()
-                ? "http://10.0.2.2:8090/api"
+                ? DEFAULT_BASE_URL
                 : baseUrl.trim();
 
         return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
@@ -118,5 +119,22 @@ final class ApiClient {
 
     private void postError(ApiCallback callback, String message) {
         handler.post(() -> callback.onError(message));
+    }
+
+    private String formatError(int status, String responseBody) {
+        if (responseBody == null || responseBody.trim().isEmpty()) {
+            return "HTTP " + status;
+        }
+
+        try {
+            JSONObject json = new JSONObject(responseBody);
+            String message = json.optString("message");
+            if (!message.trim().isEmpty()) {
+                return "HTTP " + status + ": " + message;
+            }
+        } catch (Exception ignored) {
+        }
+
+        return "HTTP " + status + ": " + responseBody;
     }
 }

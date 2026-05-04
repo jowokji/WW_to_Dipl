@@ -19,8 +19,9 @@ This folder contains a minimal native Android client written in Java. It is inte
    ```
 
 2. Open the `android` folder in Android Studio.
-3. Run the `app` configuration on an emulator or physical device.
-4. Use one of these backend URLs:
+3. Let Android Studio create `local.properties` with your Android SDK path.
+4. Run the `app` configuration on an emulator or physical device.
+5. Use one of these backend URLs:
 
    ```text
    http://10.0.2.2:8090/api
@@ -38,8 +39,8 @@ The manifest allows cleartext HTTP traffic for local diploma testing. For produc
 
 ## Verification Notes
 
-This repository includes the Android source project, but this environment does not have Gradle or the Android SDK configured. Build verification should be done in Android Studio or with:
+This repository includes the Android source project, but this environment does not have the Android SDK configured. Build verification should be done in Android Studio or with an installed Gradle distribution after `ANDROID_HOME` or `android/local.properties` points to a valid SDK:
 
 ```bash
-./gradlew :app:assembleDebug
+gradle :app:assembleDebug
 ```

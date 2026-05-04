@@ -3,6 +3,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# Gradle
+.gradle/
+
 # IntelliJ IDEA
 .idea/
 *.iml
@@ -25,6 +28,7 @@ Thumbs.db
 
 # Local configs
 .codex-m2/
+local.properties
 
 # Build
 build/

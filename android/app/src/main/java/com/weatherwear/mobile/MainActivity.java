@@ -31,6 +31,7 @@ public class MainActivity extends Activity {
     private ApiClient apiClient;
     private SharedPreferences preferences;
     private String token;
+    private String lastWeatherCity = "";
     private Long chatSessionId;
 
     private EditText baseUrlInput;
@@ -64,7 +65,7 @@ public class MainActivity extends Activity {
 
         buildUi();
         updateStatus();
-        showScreen(loginScreen);
+        showScreen(hasToken() ? weatherScreen : loginScreen);
     }
 
     private void buildUi() {
@@ -84,8 +85,8 @@ public class MainActivity extends Activity {
 
         root.addView(navigation());
 
-        loginScreen = screen("Login / Register");
-        weatherScreen = screen("Home / Weather");
+        loginScreen = screen("Login/Register");
+        weatherScreen = screen("Weather by city");
         recommendationScreen = screen("Recommendation");
         chatScreen = screen("Chat");
         historyScreen = screen("History");
@@ -184,9 +185,17 @@ public class MainActivity extends Activity {
     }
 
     private void postAuth(String path) {
+        String email = emailInput.getText().toString().trim();
+        String password = passwordInput.getText().toString();
+
+        if (email.isEmpty() || password.isEmpty()) {
+            authOutput.setText("Enter email and password first.");
+            return;
+        }
+
         JSONObject body = new JSONObject();
-        put(body, "email", emailInput.getText().toString().trim());
-        put(body, "password", passwordInput.getText().toString());
+        put(body, "email", email);
+        put(body, "password", password);
 
         authOutput.setText("Connecting...");
 
@@ -196,9 +205,15 @@ public class MainActivity extends Activity {
                 try {
                     JSONObject json = new JSONObject(response);
                     token = json.optString("token", "");
+                    if (token.trim().isEmpty()) {
+                        authOutput.setText("Authentication response does not contain JWT.");
+                        return;
+                    }
+
                     preferences.edit().putString(KEY_TOKEN, token).apply();
                     updateStatus();
                     authOutput.setText("JWT saved for " + json.optString("email"));
+                    showScreen(weatherScreen);
                 } catch (Exception ex) {
                     authOutput.setText("Authentication response error: " + ex.getMessage());
                 }
@@ -212,17 +227,29 @@ public class MainActivity extends Activity {
     }
 
     private void getWeather() {
+        if (!requireToken(weatherOutput)) {
+            return;
+        }
+
         String city = weatherCityInput.getText().toString().trim();
         if (city.isEmpty()) {
             weatherOutput.setText("Enter a city first.");
             return;
         }
 
+        weatherOutput.setText("Loading weather...");
+
         api("GET", "/weather?city=" + encode(city), null, new ApiCallback() {
             @Override
             public void onSuccess(String response) {
                 try {
                     JSONObject json = new JSONObject(response);
+                    String responseCity = json.optString("city");
+                    lastWeatherCity = responseCity.trim().isEmpty() ? city : responseCity;
+                    if (recommendationCityInput.getText().toString().trim().isEmpty()) {
+                        recommendationCityInput.setText(lastWeatherCity);
+                    }
+
                     String result = "City: " + json.optString("city") + "\n"
                             + "Temperature: " + json.optDouble("temperature") + " C\n"
                             + "Wind: " + json.optDouble("windSpeed") + " m/s\n"
@@ -242,7 +269,16 @@ public class MainActivity extends Activity {
     }
 
     private void getRecommendation() {
+        if (!requireToken(recommendationOutput)) {
+            return;
+        }
+
         String city = recommendationCityInput.getText().toString().trim();
+        if (city.isEmpty() && !lastWeatherCity.trim().isEmpty()) {
+            city = lastWeatherCity;
+            recommendationCityInput.setText(city);
+        }
+
         String occasion = occasionInput.getText().toString().trim();
 
         if (city.isEmpty()) {
@@ -256,12 +292,15 @@ public class MainActivity extends Activity {
             put(body, "occasion", occasion);
         }
 
+        recommendationOutput.setText("Getting recommendation...");
+
         api("POST", "/recommendations", body, new ApiCallback() {
             @Override
             public void onSuccess(String response) {
                 try {
                     JSONObject json = new JSONObject(response);
-                    recommendationOutput.setText(json.optString("recommendation"));
+                    recommendationOutput.setText(formatRecommendation(json));
+                    loadHistory();
                 } catch (Exception ex) {
                     recommendationOutput.setText("Recommendation response error: " + ex.getMessage());
                 }
@@ -275,6 +314,10 @@ public class MainActivity extends Activity {
     }
 
     private void sendChatMessage() {
+        if (!requireToken(chatOutput)) {
+            return;
+        }
+
         String message = chatMessageInput.getText().toString().trim();
         if (message.isEmpty()) {
             chatOutput.setText("Enter a message first.");
@@ -287,12 +330,17 @@ public class MainActivity extends Activity {
             put(body, "sessionId", chatSessionId);
         }
 
+        chatOutput.setText("Sending...");
+
         api("POST", "/chat", body, new ApiCallback() {
             @Override
             public void onSuccess(String response) {
                 try {
                     JSONObject json = new JSONObject(response);
-                    chatSessionId = json.optLong("sessionId");
+                    if (!json.isNull("sessionId")) {
+                        chatSessionId = json.getLong("sessionId");
+                    }
+                    chatMessageInput.setText("");
                     chatOutput.setText(json.optString("answer"));
                 } catch (Exception ex) {
                     chatOutput.setText("Chat response error: " + ex.getMessage());
@@ -307,6 +355,12 @@ public class MainActivity extends Activity {
     }
 
     private void loadHistory() {
+        if (!requireToken(historyOutput)) {
+            return;
+        }
+
+        historyOutput.setText("Loading history...");
+
         api("GET", "/history", null, new ApiCallback() {
             @Override
             public void onSuccess(String response) {
@@ -319,6 +373,8 @@ public class MainActivity extends Activity {
                         builder.append(item.optString("createdAt"))
                                 .append("\n")
                                 .append(item.optString("city"))
+                                .append("\n")
+                                .append(item.optString("weatherSummary"))
                                 .append("\n")
                                 .append(item.optString("recommendationText"))
                                 .append("\n\n");
@@ -340,6 +396,10 @@ public class MainActivity extends Activity {
     }
 
     private void clearHistory() {
+        if (!requireToken(historyOutput)) {
+            return;
+        }
+
         api("DELETE", "/history", null, new ApiCallback() {
             @Override
             public void onSuccess(String response) {
@@ -361,26 +421,66 @@ public class MainActivity extends Activity {
     }
 
     private void api(String method, String path, JSONObject body, ApiCallback callback) {
-        saveBaseUrl();
+        String requestToken = path.startsWith("/auth/") ? "" : token;
         apiClient.request(
                 method,
-                baseUrlInput.getText().toString(),
+                currentBaseUrl(),
                 path,
-                token,
+                requestToken,
                 body,
                 callback
         );
     }
 
-    private void saveBaseUrl() {
+    private String currentBaseUrl() {
+        String baseUrl = baseUrlInput.getText().toString().trim();
+        if (baseUrl.isEmpty()) {
+            baseUrl = DEFAULT_BASE_URL;
+            baseUrlInput.setText(baseUrl);
+        }
+
         preferences.edit()
-                .putString(KEY_BASE_URL, baseUrlInput.getText().toString().trim())
+                .putString(KEY_BASE_URL, baseUrl)
                 .apply();
+
+        return baseUrl;
     }
 
     private void updateStatus() {
-        boolean authenticated = token != null && !token.trim().isEmpty();
-        statusView.setText(authenticated ? "JWT token saved" : "Not authenticated");
+        statusView.setText(hasToken() ? "JWT token saved" : "Not authenticated");
+    }
+
+    private boolean hasToken() {
+        return token != null && !token.trim().isEmpty();
+    }
+
+    private boolean requireToken(TextView target) {
+        if (hasToken()) {
+            return true;
+        }
+
+        String message = "Login or register first. JWT is required for this request.";
+        target.setText(message);
+        authOutput.setText(message);
+        showScreen(loginScreen);
+        return false;
+    }
+
+    private String formatRecommendation(JSONObject json) {
+        StringBuilder builder = new StringBuilder();
+
+        String city = json.optString("city");
+        if (!city.trim().isEmpty()) {
+            builder.append("City: ").append(city).append("\n\n");
+        }
+
+        String weatherSummary = json.optString("weatherSummary");
+        if (!weatherSummary.trim().isEmpty()) {
+            builder.append(weatherSummary).append("\n\n");
+        }
+
+        builder.append(json.optString("recommendation"));
+        return builder.toString();
     }
 
     private void showScreen(LinearLayout visibleScreen) {

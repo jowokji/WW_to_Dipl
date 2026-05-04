@@ -13,9 +13,9 @@ This checklist maps the diploma API documentation requirements to the WeatherWea
 | Complete API specification | Done | `openapi/weatherwear-api.openapi.json` |
 | Industry standard | Done | OpenAPI 3.0.3 |
 | Version-controlled YAML or JSON file | Done | JSON file under `Documentation/api/openapi/` |
-| Specification validation | Partly done | JSON syntax validated locally; Redocly/Spectral/Swagger Editor commands documented in `strategy/validation.md` |
-| Sample requests | Done | OpenAPI examples and `examples/curl-examples.md` |
-| Sample responses | Done | OpenAPI examples, endpoint reference, tutorial |
+| Specification validation | Done | JSON syntax, internal refs, example coverage, and runtime annotation compilation documented in `strategy/validation.md` |
+| Sample requests | Done | Runtime Swagger examples, OpenAPI examples, and `examples/curl-examples.md` |
+| Sample responses | Done | Runtime Swagger examples, OpenAPI examples, endpoint reference, tutorial |
 | HTTP status codes | Done | `reference/endpoints.md`, OpenAPI responses |
 | Error messages | Done | `reference/error-taxonomy.md` |
 | Data model descriptions | Done | `reference/data-models.md` |
@@ -26,6 +26,8 @@ This checklist maps the diploma API documentation requirements to the WeatherWea
 | Architecture overview | Done | `architecture/overview.md` |
 | System context diagram | Done | `architecture/system-context.mmd` |
 | Request flow diagram | Done | `architecture/recommendation-sequence.mmd`, `chat-sequence.mmd` |
+| Request-response lifecycle diagram | Done | `architecture/request-lifecycle.mmd` |
+| Component/dependency diagram | Done | `architecture/component-diagram.mmd` |
 | Modules/resources explanation | Done | `architecture/overview.md` |
 | Developer-accessible format | Done | Markdown documentation repository plus Swagger UI route |
 | Documentation strategy | Done | `strategy/documentation-strategy.md` |
@@ -49,7 +51,8 @@ This checklist maps the diploma API documentation requirements to the WeatherWea
 | Authentication deep dive | Covered | `guides/authentication.md` |
 | Error taxonomy | Covered | `reference/error-taxonomy.md` |
 | Idempotency | Covered | `reference/versioning-and-limits.md` |
-| Component and dependency map | Covered | `architecture/overview.md` |
+| Component and dependency map | Covered | `architecture/overview.md`, `architecture/component-diagram.mmd` |
+| Request-response lifecycles | Covered | `architecture/request-lifecycle.mmd`, `recommendation-sequence.mmd`, `chat-sequence.mmd` |
 | Contract testing definitions | Not implemented | Listed as known gap |
 | Mock server or sandbox | Not implemented | Listed as known gap |
 | OpenAPI linting with Spectral or Redocly | Prepared | Commands documented; CI recommendation added |

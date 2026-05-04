@@ -12,6 +12,7 @@ target/
 
 # Logs
 *.log
+~$*.docx
 
 # OS files
 .DS_Store

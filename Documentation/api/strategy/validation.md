@@ -23,7 +23,25 @@ Passed
 Internal `$ref` pointers were checked with a local Node.js script:
 
 ```text
-OpenAPI JSON parsed. 102 internal references resolved.
+OpenAPI JSON parsed. 104 internal references resolved.
+```
+
+Request and success-response example coverage was checked with a local Node.js script:
+
+```text
+All JSON request/2xx response examples covered
+```
+
+Runtime Swagger annotations and Java DTO schema annotations were verified by Maven tests:
+
+```powershell
+mvn -B test
+```
+
+Result:
+
+```text
+Tests run: 112, Failures: 0, Errors: 0, Skipped: 0
 ```
 
 ## Recommended OpenAPI Validation Tools
@@ -62,7 +80,9 @@ npx @stoplight/spectral-cli lint Documentation/api/openapi/weatherwear-api.opena
 | Request DTOs are represented as schemas | Passed |
 | Response DTOs are represented as schemas | Passed |
 | Error model is documented | Passed |
-| Examples are included | Passed |
+| JSON request examples are included for body-based endpoints | Passed |
+| JSON success-response examples are included | Passed |
+| Runtime Swagger annotations compile | Passed |
 
 ## CI Recommendation
 

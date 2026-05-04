@@ -3,6 +3,7 @@ package com.weatherwear.dto.preference;
 import com.weatherwear.common.ActivityLevel;
 import com.weatherwear.common.SensitivityLevel;
 import com.weatherwear.common.StylePreference;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -11,32 +12,44 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Schema(description = "User preference profile used to personalize clothing recommendations.")
 public class PreferenceRequest {
 
     @NotNull(message = "Style preference is required")
+    @Schema(description = "Preferred clothing style.", example = "CASUAL")
     private StylePreference stylePreference;
 
     @NotNull(message = "Cold sensitivity is required")
+    @Schema(description = "How strongly cold weather affects the user.", example = "MEDIUM")
     private SensitivityLevel coldSensitivity;
 
     @NotNull(message = "Heat sensitivity is required")
+    @Schema(description = "How strongly hot weather affects the user.", example = "LOW")
     private SensitivityLevel heatSensitivity;
 
+    @Schema(description = "How strongly wind affects the user.", example = "HIGH")
     private SensitivityLevel windSensitivity;
 
+    @Schema(description = "How strongly rain affects the user.", example = "MEDIUM")
     private SensitivityLevel rainSensitivity;
 
     @Min(value = 1, message = "Max layers must be at least 1")
     @Max(value = 5, message = "Max layers must be at most 5")
+    @Schema(description = "Maximum acceptable clothing layers.", example = "3", minimum = "1", maximum = "5")
     private Short maxLayers;
 
+    @Schema(description = "Whether the user prefers hats, caps, or other headwear.", example = "true")
     private Boolean prefersHeadwear;
 
+    @Schema(description = "Whether waterproof items should be prioritized in wet weather.", example = "true")
     private Boolean prefersWaterproof;
 
+    @Schema(description = "Expected activity intensity.", example = "MEDIUM")
     private ActivityLevel activityLevel;
 
+    @Schema(description = "Comma-separated preferred colors.", example = "black, navy, grey")
     private String preferredColors;
 
+    @Schema(description = "Comma-separated clothing items or materials to avoid.", example = "wool sweaters")
     private String avoidItems;
 }

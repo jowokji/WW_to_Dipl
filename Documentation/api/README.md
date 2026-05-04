@@ -1,6 +1,6 @@
 # WeatherWear API Documentation
 
-Reviewed: 2026-04-30
+Reviewed: 2026-05-04
 
 This folder contains the API documentation set for the WeatherWear diploma backend. It is based on the current Spring Boot source code in `src/main/java/com/weatherwear` and the runtime configuration in `src/main/resources/application.yml`.
 
@@ -38,6 +38,8 @@ Version-controlled OpenAPI specification:
 Documentation/api/openapi/weatherwear-api.openapi.json
 ```
 
+The runtime Swagger UI is enriched with controller-level OpenAPI annotations, DTO schema descriptions, request examples, response examples, error examples, and endpoint-specific JWT security metadata.
+
 ## What Is Included
 
 | Area | Included endpoints | Authentication |
@@ -60,7 +62,7 @@ Documentation/api/openapi/weatherwear-api.openapi.json
 | `reference/` | Endpoint reference, data models, errors, limits, versioning |
 | `guides/` | Getting started, authentication, step-by-step integration tutorial |
 | `examples/` | Runnable cURL-style examples and sample responses |
-| `architecture/` | System overview, request flow, sequence diagrams |
+| `architecture/` | System context, component diagram, request lifecycle, and sequence diagrams |
 | `strategy/` | Documentation strategy, validation notes, changelog |
 
 ## Requirement Coverage
@@ -76,6 +78,8 @@ Documentation/api/openapi/weatherwear-api.openapi.json
 | Getting Started guide | `guides/getting-started.md` |
 | Step-by-step integration tutorial | `guides/integration-tutorial.md` |
 | Architecture overview | `architecture/overview.md` and `.mmd` diagrams |
+| Component/dependency diagram | `architecture/component-diagram.mmd` embedded in `architecture/overview.md` |
+| Request-response lifecycle | `architecture/request-lifecycle.mmd` embedded in `architecture/overview.md` |
 | Documentation strategy | `strategy/documentation-strategy.md` |
 | Versioning and changelog | `reference/versioning-and-limits.md`, `strategy/changelog.md` |
 | Validation report | `strategy/validation.md` |

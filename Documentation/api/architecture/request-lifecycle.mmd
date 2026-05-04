@@ -1,0 +1,26 @@
+flowchart TD
+    Start["Client sends HTTP request to /api/..."] --> PublicCheck{"Public endpoint?"}
+    PublicCheck -- "Yes" --> Controller["Controller receives request"]
+    PublicCheck -- "No" --> Jwt["JwtAuthFilter validates Bearer token"]
+    Jwt --> JwtValid{"Token valid?"}
+    JwtValid -- "No" --> Unauthorized["401 Unauthorized"]
+    JwtValid -- "Yes" --> Controller
+
+    Controller --> Validate["Validate query, path, and JSON body"]
+    Validate --> ValidRequest{"Valid request?"}
+    ValidRequest -- "No" --> BadRequest["400 Bad Request with ErrorResponse"]
+    ValidRequest -- "Yes" --> Service["Service executes business workflow"]
+
+    Service --> External{"External dependency needed?"}
+    External -- "Weather" --> OpenWeather["OpenWeather API"]
+    External -- "LLM" --> LLM["LLM API"]
+    External -- "No" --> Persistence["Read or write PostgreSQL"]
+
+    OpenWeather --> DependencyOk{"Dependency success?"}
+    LLM --> DependencyOk
+    DependencyOk -- "No" --> BadGateway["502 Bad Gateway with ErrorResponse"]
+    DependencyOk -- "Yes" --> Persistence
+
+    Persistence --> ResourceCheck{"Resource exists and belongs to user?"}
+    ResourceCheck -- "No" --> NotFound["404 Not Found with ErrorResponse"]
+    ResourceCheck -- "Yes" --> Success["2xx response DTO"]

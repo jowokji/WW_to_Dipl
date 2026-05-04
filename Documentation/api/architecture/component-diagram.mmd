@@ -1,0 +1,38 @@
+flowchart TD
+    Client["Mobile or web client"] --> Security["Spring Security + JwtAuthFilter"]
+    Security --> Controllers["REST Controllers"]
+
+    Controllers --> AuthService["AuthService"]
+    Controllers --> UserService["UserService"]
+    Controllers --> WeatherService["WeatherService"]
+    Controllers --> RecommendationService["RecommendationService"]
+    Controllers --> PreferenceService["PreferenceService"]
+    Controllers --> HistoryService["HistoryService"]
+    Controllers --> FeedbackService["FeedbackService"]
+    Controllers --> ChatService["ChatService"]
+
+    RecommendationService --> WeatherService
+    RecommendationService --> LlmClient["LlmClient"]
+    RecommendationService --> Repositories["Spring Data JPA repositories"]
+
+    ChatService --> WeatherService
+    ChatService --> LlmClient
+    ChatService --> Repositories
+
+    WeatherService --> WeatherClient["WeatherApiClient"]
+    WeatherService --> WeatherCacheRepository["WeatherCacheRepository"]
+
+    AuthService --> JwtService["JwtService"]
+    AuthService --> UserRepository["UserRepository"]
+    UserService --> UserRepository
+    PreferenceService --> Repositories
+    HistoryService --> Repositories
+    FeedbackService --> Repositories
+
+    Repositories --> PostgreSQL["PostgreSQL"]
+    WeatherCacheRepository --> PostgreSQL
+    WeatherClient --> OpenWeather["OpenWeather API"]
+    LlmClient --> ExternalLLM["LLM API"]
+
+    Controllers --> DTOs["Request and response DTOs"]
+    Exceptions["GlobalExceptionHandler"] --> ErrorResponse["ErrorResponse DTO"]

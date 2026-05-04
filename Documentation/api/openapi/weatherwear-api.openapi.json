@@ -247,7 +247,7 @@
                       "humidity": 71,
                       "windSpeed": 4.6,
                       "condition": "CLOUDS",
-                      "precipitation": 0.0,
+                      "precipitation": 0,
                       "cached": false
                     }
                   }
@@ -261,11 +261,11 @@
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           },
-          "502": {
-            "$ref": "#/components/responses/BadGatewayError"
-          },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGatewayError"
           }
         }
       }
@@ -316,6 +316,23 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WeatherResponse"
+                },
+                "examples": {
+                  "weatherByCoordinates": {
+                    "summary": "Weather by coordinates from cache",
+                    "value": {
+                      "city": "Vilnius",
+                      "latitude": 54.6872,
+                      "longitude": 25.2797,
+                      "temperature": 12.1,
+                      "feelsLike": 10.5,
+                      "humidity": 72,
+                      "windSpeed": 4.2,
+                      "condition": "CLOUDS",
+                      "precipitation": 0,
+                      "cached": true
+                    }
+                  }
                 }
               }
             }
@@ -326,11 +343,11 @@
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           },
-          "502": {
-            "$ref": "#/components/responses/BadGatewayError"
-          },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGatewayError"
           }
         }
       }
@@ -401,11 +418,11 @@
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           },
-          "502": {
-            "$ref": "#/components/responses/BadGatewayError"
-          },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGatewayError"
           }
         }
       }
@@ -430,6 +447,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PreferenceResponse"
+                },
+                "examples": {
+                  "preferences": {
+                    "summary": "Current user preferences",
+                    "value": {
+                      "id": 7,
+                      "stylePreference": "CASUAL",
+                      "coldSensitivity": "MEDIUM",
+                      "heatSensitivity": "LOW",
+                      "windSensitivity": "HIGH",
+                      "rainSensitivity": "MEDIUM",
+                      "maxLayers": 3,
+                      "prefersHeadwear": true,
+                      "prefersWaterproof": true,
+                      "activityLevel": "MEDIUM",
+                      "preferredColors": "black, navy, grey",
+                      "avoidItems": "wool sweaters"
+                    }
+                  }
                 }
               }
             }
@@ -488,6 +524,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PreferenceResponse"
+                },
+                "examples": {
+                  "preferencesSaved": {
+                    "summary": "Saved preferences",
+                    "value": {
+                      "id": 7,
+                      "stylePreference": "CASUAL",
+                      "coldSensitivity": "MEDIUM",
+                      "heatSensitivity": "LOW",
+                      "windSensitivity": "HIGH",
+                      "rainSensitivity": "MEDIUM",
+                      "maxLayers": 3,
+                      "prefersHeadwear": true,
+                      "prefersWaterproof": true,
+                      "activityLevel": "MEDIUM",
+                      "preferredColors": "black, navy, grey",
+                      "avoidItems": "wool sweaters"
+                    }
+                  }
                 }
               }
             }
@@ -524,6 +579,24 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PreferenceRequest"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Update preference profile",
+                  "value": {
+                    "stylePreference": "CASUAL",
+                    "coldSensitivity": "MEDIUM",
+                    "heatSensitivity": "LOW",
+                    "windSensitivity": "HIGH",
+                    "rainSensitivity": "MEDIUM",
+                    "maxLayers": 3,
+                    "prefersHeadwear": true,
+                    "prefersWaterproof": true,
+                    "activityLevel": "MEDIUM",
+                    "preferredColors": "black, navy, grey",
+                    "avoidItems": "wool sweaters"
+                  }
+                }
               }
             }
           }
@@ -535,6 +608,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PreferenceResponse"
+                },
+                "examples": {
+                  "preferencesUpdated": {
+                    "summary": "Updated preferences",
+                    "value": {
+                      "id": 7,
+                      "stylePreference": "CASUAL",
+                      "coldSensitivity": "MEDIUM",
+                      "heatSensitivity": "LOW",
+                      "windSensitivity": "HIGH",
+                      "rainSensitivity": "MEDIUM",
+                      "maxLayers": 3,
+                      "prefersHeadwear": true,
+                      "prefersWaterproof": true,
+                      "activityLevel": "MEDIUM",
+                      "preferredColors": "black, navy, grey",
+                      "avoidItems": "wool sweaters"
+                    }
+                  }
                 }
               }
             }
@@ -573,6 +665,20 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/HistoryResponse"
+                  }
+                },
+                "examples": {
+                  "historyList": {
+                    "summary": "Recommendation history list",
+                    "value": [
+                      {
+                        "id": 101,
+                        "city": "Vilnius",
+                        "weatherSummary": "Temp: 12.4, Feels: 10.8, Condition: CLOUDS",
+                        "recommendationText": "Wear a light waterproof jacket and closed shoes.",
+                        "createdAt": "2026-04-30T12:45:00"
+                      }
+                    ]
                   }
                 }
               }
@@ -645,6 +751,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HistoryResponse"
+                },
+                "examples": {
+                  "historyItem": {
+                    "summary": "Recommendation history item",
+                    "value": {
+                      "id": 101,
+                      "city": "Vilnius",
+                      "weatherSummary": "Temp: 12.4, Feels: 10.8, Condition: CLOUDS",
+                      "recommendationText": "Wear a light waterproof jacket and closed shoes.",
+                      "createdAt": "2026-04-30T12:45:00"
+                    }
+                  }
                 }
               }
             }
@@ -701,6 +819,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FeedbackResponse"
+                },
+                "examples": {
+                  "feedbackCreated": {
+                    "summary": "Created feedback",
+                    "value": {
+                      "id": 501,
+                      "recommendationHistoryId": 101,
+                      "feedbackType": "RATING",
+                      "rating": 5,
+                      "comment": "Useful recommendation for windy weather.",
+                      "createdAt": "2026-04-30T12:45:00"
+                    }
+                  }
                 }
               }
             }
@@ -740,6 +871,21 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/FeedbackResponse"
+                  }
+                },
+                "examples": {
+                  "feedbackList": {
+                    "summary": "Feedback list",
+                    "value": [
+                      {
+                        "id": 501,
+                        "recommendationHistoryId": 101,
+                        "feedbackType": "RATING",
+                        "rating": 5,
+                        "comment": "Useful recommendation for windy weather.",
+                        "createdAt": "2026-04-30T12:45:00"
+                      }
+                    ]
                   }
                 }
               }
@@ -789,6 +935,21 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/FeedbackResponse"
+                  }
+                },
+                "examples": {
+                  "recommendationFeedback": {
+                    "summary": "Feedback for one recommendation",
+                    "value": [
+                      {
+                        "id": 501,
+                        "recommendationHistoryId": 101,
+                        "feedbackType": "RATING",
+                        "rating": 5,
+                        "comment": "Useful recommendation for windy weather.",
+                        "createdAt": "2026-04-30T12:45:00"
+                      }
+                    ]
                   }
                 }
               }
@@ -916,11 +1077,11 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
-          "502": {
-            "$ref": "#/components/responses/BadGatewayError"
-          },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGatewayError"
           }
         }
       }
@@ -947,6 +1108,19 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ChatSessionResponse"
+                  }
+                },
+                "examples": {
+                  "sessions": {
+                    "summary": "Chat session list",
+                    "value": [
+                      {
+                        "id": 12,
+                        "title": "Style chat",
+                        "createdAt": "2026-04-30T12:40:00",
+                        "updatedAt": "2026-04-30T12:45:00"
+                      }
+                    ]
                   }
                 }
               }
@@ -997,6 +1171,25 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ChatMessageDto"
+                  }
+                },
+                "examples": {
+                  "messages": {
+                    "summary": "Chat session messages",
+                    "value": [
+                      {
+                        "id": 9001,
+                        "role": "USER",
+                        "content": "What should I wear for a long walk today?",
+                        "createdAt": "2026-04-30T12:44:00"
+                      },
+                      {
+                        "id": 9002,
+                        "role": "ASSISTANT",
+                        "content": "Choose a breathable base layer, a light jacket, comfortable trousers, and shoes with grip.",
+                        "createdAt": "2026-04-30T12:45:00"
+                      }
+                    ]
                   }
                 }
               }
@@ -1347,7 +1540,7 @@
             "type": "number",
             "format": "double",
             "description": "Precipitation volume from the upstream provider when available.",
-            "example": 0.0
+            "example": 0
           },
           "cached": {
             "type": "boolean",

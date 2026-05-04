@@ -2,6 +2,16 @@
 
 WeatherWear is a Spring Boot REST backend. It combines user authentication, weather data, AI-generated clothing recommendations, persistence, and feedback loops.
 
+## Diagram Coverage
+
+| Requirement area | Diagram in this document | Purpose |
+| --- | --- | --- |
+| System context | System Context | Shows external actors and dependencies |
+| Modules and resources | Component Diagram, Main Modules, Resource Model | Explains backend structure and ownership boundaries |
+| Complex request flows | Recommendation Request Flow, Chat Request Flow | Shows step-by-step API workflows |
+| Request-response lifecycle | Request-Response Lifecycle | Shows validation, authentication, dependencies, persistence, and errors |
+| Dependency map | Component Diagram | Shows internal and external dependencies |
+
 ## System Context
 
 ```mermaid
@@ -32,6 +42,55 @@ Documentation/api/architecture/system-context.mmd
 | Weather client | `client.weather` | OpenWeather integration and normalization |
 | LLM client | `client.llm` | AI recommendation generation |
 | Exceptions | `exception` | Error taxonomy and global error response formatting |
+
+## Component Diagram
+
+```mermaid
+flowchart TD
+    Client["Mobile or web client"] --> Security["Spring Security + JwtAuthFilter"]
+    Security --> Controllers["REST Controllers"]
+
+    Controllers --> AuthService["AuthService"]
+    Controllers --> UserService["UserService"]
+    Controllers --> WeatherService["WeatherService"]
+    Controllers --> RecommendationService["RecommendationService"]
+    Controllers --> PreferenceService["PreferenceService"]
+    Controllers --> HistoryService["HistoryService"]
+    Controllers --> FeedbackService["FeedbackService"]
+    Controllers --> ChatService["ChatService"]
+
+    RecommendationService --> WeatherService
+    RecommendationService --> LlmClient["LlmClient"]
+    RecommendationService --> Repositories["Spring Data JPA repositories"]
+
+    ChatService --> WeatherService
+    ChatService --> LlmClient
+    ChatService --> Repositories
+
+    WeatherService --> WeatherClient["WeatherApiClient"]
+    WeatherService --> WeatherCacheRepository["WeatherCacheRepository"]
+
+    AuthService --> JwtService["JwtService"]
+    AuthService --> UserRepository["UserRepository"]
+    UserService --> UserRepository
+    PreferenceService --> Repositories
+    HistoryService --> Repositories
+    FeedbackService --> Repositories
+
+    Repositories --> PostgreSQL["PostgreSQL"]
+    WeatherCacheRepository --> PostgreSQL
+    WeatherClient --> OpenWeather["OpenWeather API"]
+    LlmClient --> ExternalLLM["LLM API"]
+
+    Controllers --> DTOs["Request and response DTOs"]
+    Exceptions["GlobalExceptionHandler"] --> ErrorResponse["ErrorResponse DTO"]
+```
+
+Source file:
+
+```text
+Documentation/api/architecture/component-diagram.mmd
+```
 
 ## Resource Model
 
@@ -121,21 +180,41 @@ Documentation/api/architecture/chat-sequence.mmd
 7. External calls to OpenWeather or LLM provider are wrapped in domain exceptions.
 8. Controller returns DTO response, or `GlobalExceptionHandler` returns `ErrorResponse`.
 
-## Dependency Map
+## Request-Response Lifecycle
 
 ```mermaid
 flowchart TD
-    Controllers["Controllers"] --> Services["Services"]
-    Controllers --> DTOs["DTOs"]
-    Services --> Repositories["Repositories"]
-    Services --> WeatherClient["Weather API client"]
-    Services --> LlmClient["LLM client"]
-    Services --> SecurityUtils["SecurityUtils"]
-    Repositories --> Entities["Entities"]
-    Repositories --> PostgreSQL["PostgreSQL"]
-    WeatherClient --> OpenWeather["OpenWeather"]
-    LlmClient --> ExternalLLM["LLM provider"]
-    Exceptions["GlobalExceptionHandler"] --> ErrorDto["ErrorResponse"]
+    Start["Client sends HTTP request to /api/..."] --> PublicCheck{"Public endpoint?"}
+    PublicCheck -- "Yes" --> Controller["Controller receives request"]
+    PublicCheck -- "No" --> Jwt["JwtAuthFilter validates Bearer token"]
+    Jwt --> JwtValid{"Token valid?"}
+    JwtValid -- "No" --> Unauthorized["401 Unauthorized"]
+    JwtValid -- "Yes" --> Controller
+
+    Controller --> Validate["Validate query, path, and JSON body"]
+    Validate --> ValidRequest{"Valid request?"}
+    ValidRequest -- "No" --> BadRequest["400 Bad Request with ErrorResponse"]
+    ValidRequest -- "Yes" --> Service["Service executes business workflow"]
+
+    Service --> External{"External dependency needed?"}
+    External -- "Weather" --> OpenWeather["OpenWeather API"]
+    External -- "LLM" --> LLM["LLM API"]
+    External -- "No" --> Persistence["Read or write PostgreSQL"]
+
+    OpenWeather --> DependencyOk{"Dependency success?"}
+    LLM --> DependencyOk
+    DependencyOk -- "No" --> BadGateway["502 Bad Gateway with ErrorResponse"]
+    DependencyOk -- "Yes" --> Persistence
+
+    Persistence --> ResourceCheck{"Resource exists and belongs to user?"}
+    ResourceCheck -- "No" --> NotFound["404 Not Found with ErrorResponse"]
+    ResourceCheck -- "Yes" --> Success["2xx response DTO"]
+```
+
+Source file:
+
+```text
+Documentation/api/architecture/request-lifecycle.mmd
 ```
 
 ## Cross-Service Contract Notes
@@ -145,4 +224,3 @@ The project is a single backend service with external provider integrations, not
 - OpenWeather API response contract, normalized into `WeatherResponse`.
 - LLM provider chat completion contract, normalized into plain recommendation text.
 - PostgreSQL schema contract, documented separately in `Documentation/database_documentation.md`.
-

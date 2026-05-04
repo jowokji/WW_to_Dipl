@@ -20,6 +20,7 @@ This document explains how the WeatherWear API documentation is maintained and h
 | Data format | JSON |
 | Diagrams | Mermaid |
 | Runtime docs | Springdoc Swagger UI |
+| Runtime annotations | `io.swagger.v3.oas.annotations` on controllers and DTOs |
 | Static docs | Markdown documentation repository |
 
 ## Source of Truth
@@ -28,6 +29,7 @@ This document explains how the WeatherWear API documentation is maintained and h
 | --- | --- |
 | Java controllers | Runtime endpoint paths and HTTP methods |
 | Java DTOs | Request and response fields |
+| Swagger/OpenAPI annotations | Runtime summaries, descriptions, status codes, examples, and schema metadata |
 | Validation annotations | Required fields and validation constraints |
 | `GlobalExceptionHandler` | Error response structure and status code mapping |
 | `SecurityConfig` | Public vs protected endpoint rules |
@@ -76,11 +78,12 @@ Breaking changes should be handled by:
 ## Maintenance Workflow
 
 1. Change controller, DTO, service, security, or exception behavior.
-2. Update `openapi/weatherwear-api.openapi.json`.
-3. Update affected reference pages and examples.
-4. Add a changelog entry.
-5. Run local validation from `strategy/validation.md`.
-6. Review that examples match the actual API behavior.
+2. Update Swagger annotations in controllers and DTOs.
+3. Update `openapi/weatherwear-api.openapi.json`.
+4. Update affected reference pages and examples.
+5. Add a changelog entry.
+6. Run local validation from `strategy/validation.md`.
+7. Review that examples match the actual API behavior.
 
 ## Known Documentation Gaps
 
@@ -91,4 +94,3 @@ Breaking changes should be handled by:
 | No contract tests | Current tests are Java unit and controller tests | Add Pact or OpenAPI-based contract checks |
 | No pagination docs for implemented behavior | Pagination is not implemented | Add when list endpoints accept page and size parameters |
 | No rate-limit headers | Rate limiting is not implemented | Add once API gateway or filter is introduced |
-

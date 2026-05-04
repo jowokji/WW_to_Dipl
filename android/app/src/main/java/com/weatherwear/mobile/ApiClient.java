@@ -78,7 +78,7 @@ final class ApiClient {
                 postError(callback, formatError(status, responseBody));
             }
         } catch (Exception ex) {
-            postError(callback, ex.getMessage() != null ? ex.getMessage() : "Network error");
+            postError(callback, formatNetworkError(ex));
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -122,6 +122,18 @@ final class ApiClient {
     }
 
     private String formatError(int status, String responseBody) {
+        if (status == 401) {
+            return "HTTP 401: Login expired or token is missing.";
+        }
+
+        if (status == 403) {
+            return "HTTP 403: This action requires a valid login.";
+        }
+
+        if (status >= 500) {
+            return "HTTP " + status + ": Backend error. Check Docker logs.";
+        }
+
         if (responseBody == null || responseBody.trim().isEmpty()) {
             return "HTTP " + status;
         }
@@ -136,5 +148,23 @@ final class ApiClient {
         }
 
         return "HTTP " + status + ": " + responseBody;
+    }
+
+    private String formatNetworkError(Exception ex) {
+        String message = ex.getMessage();
+        if (message == null || message.trim().isEmpty()) {
+            return "Network error.";
+        }
+
+        String lower = message.toLowerCase();
+        if (lower.contains("failed to connect") || lower.contains("connection refused")) {
+            return "Backend is unavailable. Start Docker and check the Backend URL.";
+        }
+
+        if (lower.contains("timeout")) {
+            return "Request timed out. Check backend, network, or API provider keys.";
+        }
+
+        return message;
     }
 }

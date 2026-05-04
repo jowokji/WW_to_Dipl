@@ -43,7 +43,7 @@ public class UserFeedback {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "feedback_type", nullable = false)
+    @Column(name = "feedback_type", nullable = false, length = 30)
     private FeedbackType feedbackType;
 
     private Short rating;

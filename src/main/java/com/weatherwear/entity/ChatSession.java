@@ -37,6 +37,7 @@ public class ChatSession {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false)
     private String title;
 
     @Column(name = "created_at", nullable = false)

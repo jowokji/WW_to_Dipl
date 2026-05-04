@@ -30,6 +30,7 @@ public class WeatherCache {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 120)
     private String city;
 
     private Double latitude;
@@ -45,6 +46,7 @@ public class WeatherCache {
     private Double windSpeed;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 50)
     private WeatherCondition condition;
 
     private Double precipitation;

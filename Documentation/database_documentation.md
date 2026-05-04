@@ -1,6 +1,6 @@
 # WeatherWear Database Documentation
 
-Reviewed: 2026-04-30
+Reviewed: 2026-05-04
 
 ## 1. Scope and DBMS Choice
 
@@ -13,7 +13,7 @@ This project belongs to the Transactional Database (OLTP) category. OLAP and NoS
 | Requirement | Status | Project artifact |
 | --- | --- | --- |
 | Modern relational DBMS | Done | PostgreSQL 16 in `docker-compose.yml` |
-| Database structure created by scripts/migrations | Done | `src/main/resources/db/migration/V1__init_schema.sql`, `V2__database_integrity_and_reporting.sql` |
+| Database structure created by scripts/migrations | Done | `src/main/resources/db/migration/V1__init_schema.sql`, `V2__database_integrity_and_reporting.sql`, `V3__align_legacy_schema_with_documentation.sql` |
 | DDL script in version control | Done | Flyway migration files |
 | Data dictionary | Done | Section 5 of this document |
 | Logical schema | Done | `Documentation/database_schema.mmd` and section 4 |
@@ -39,6 +39,7 @@ Version history is stored in Git through migration files:
 
 - `V1__init_schema.sql`: base tables, primary keys, foreign keys, initial checks, indexes.
 - `V2__database_integrity_and_reporting.sql`: additional integrity checks, triggers, masking function, reporting views.
+- `V3__align_legacy_schema_with_documentation.sql`: aligns older Hibernate-created local schemas with the documented Flyway schema, including cascade foreign keys and documented column defaults.
 
 Manual database changes should not be applied directly in production. Every structure change should be added as a new migration, for example `V3__add_new_feature.sql`.
 

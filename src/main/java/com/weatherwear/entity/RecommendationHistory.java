@@ -35,6 +35,7 @@ public class RecommendationHistory {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(length = 120)
     private String city;
 
     @Column(name = "weather_summary", length = 1000)

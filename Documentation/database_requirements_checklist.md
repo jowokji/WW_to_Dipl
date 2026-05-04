@@ -12,7 +12,7 @@ The project uses a relational transactional database (OLTP): PostgreSQL. OLAP an
 | Describe tables, columns, data types, keys, and quality expectations | Yes | Data dictionary section |
 | Describe integrity and transactions | Yes | Documentation section 7, migrations, Spring services |
 | Logical schema | Yes | `Documentation/database_schema.mmd` and DOCX figure |
-| DDL script | Yes | `src/main/resources/db/migration/V1__init_schema.sql`, `V2__database_integrity_and_reporting.sql` |
+| DDL script | Yes | `src/main/resources/db/migration/V1__init_schema.sql`, `V2__database_integrity_and_reporting.sql`, `V3__align_legacy_schema_with_documentation.sql` |
 | Modern relational DBMS | Yes | PostgreSQL 16 |
 | 3NF design | Yes | Documentation normalization section |
 | Enough tables and relationships | Yes | 7 tables, 1:1 and 1:N relationships |

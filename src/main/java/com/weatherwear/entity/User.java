@@ -39,7 +39,7 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private Role role;
 
     @Column(name = "created_at", nullable = false)

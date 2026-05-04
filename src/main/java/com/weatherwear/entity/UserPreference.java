@@ -43,23 +43,23 @@ public class UserPreference {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "style_preference", nullable = false)
+    @Column(name = "style_preference", nullable = false, length = 30)
     private StylePreference stylePreference;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "cold_sensitivity", nullable = false)
+    @Column(name = "cold_sensitivity", nullable = false, length = 20)
     private SensitivityLevel coldSensitivity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "heat_sensitivity", nullable = false)
+    @Column(name = "heat_sensitivity", nullable = false, length = 20)
     private SensitivityLevel heatSensitivity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "wind_sensitivity", nullable = false)
+    @Column(name = "wind_sensitivity", nullable = false, length = 20)
     private SensitivityLevel windSensitivity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "rain_sensitivity", nullable = false)
+    @Column(name = "rain_sensitivity", nullable = false, length = 20)
     private SensitivityLevel rainSensitivity;
 
     @Column(name = "max_layers", nullable = false)
@@ -72,7 +72,7 @@ public class UserPreference {
     private Boolean prefersWaterproof;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "activity_level", nullable = false)
+    @Column(name = "activity_level", nullable = false, length = 20)
     private ActivityLevel activityLevel;
 
     @Column(name = "preferred_colors")

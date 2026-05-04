@@ -40,7 +40,7 @@ public class ChatMessage {
     private ChatSession session;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private ChatRole role;
 
     @Column(nullable = false, columnDefinition = "TEXT")

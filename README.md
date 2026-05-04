@@ -19,6 +19,24 @@ WeatherWear backend for a diploma project.
 
 Flyway migrations are the source of truth for the database schema.
 
+## Local Docker startup
+
+Create a local environment file before running Docker Compose:
+
+```bash
+cp .env.example .env
+```
+
+Then open `.env` and replace the placeholder values for:
+
+- `POSTGRES_PASSWORD`
+- `APP_DB_PASSWORD`
+- `JWT_SECRET`
+- `WEATHER_API_KEY`
+- `LLM_API_KEY`
+
+Docker Compose reads `.env` automatically from the project root. The file is ignored by Git because it contains local secrets.
+
 ## Verification Commands
 
 Run these before final submission:

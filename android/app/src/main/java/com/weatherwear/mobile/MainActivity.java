@@ -399,7 +399,7 @@ public class MainActivity extends Activity {
         }
 
         setLoading(recommendationButton, true);
-        recommendationOutput.setText("Getting recommendation...");
+        recommendationOutput.setText("Getting recommendation... GPT-5 can take up to a minute.");
 
         api("POST", "/recommendations", body, new ApiCallback() {
             @Override

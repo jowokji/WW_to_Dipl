@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -32,15 +33,27 @@ public class LlmClient {
     @Value("${llm.api.model:gpt-5}")
     private String model;
 
+    @Value("${llm.api.max-completion-tokens:500}")
+    private Integer maxCompletionTokens;
+
+    @Value("${llm.api.reasoning-effort:minimal}")
+    private String reasoningEffort;
+
     public String generateRecommendation(String prompt) {
         try {
-            Map<String, Object> request = Map.of(
-                    "model", model,
-                    "messages", new Object[]{
-                            Map.of("role", "system", "content", SYSTEM_INSTRUCTIONS),
-                            Map.of("role", "user", "content", prompt)
+            Map<String, Object> request = new HashMap<>();
+            request.put("model", model);
+            request.put("max_completion_tokens", maxCompletionTokens);
+            request.put(
+                    "messages",
+                    new Object[]{
+                        Map.of("role", "system", "content", SYSTEM_INSTRUCTIONS),
+                        Map.of("role", "user", "content", prompt)
                     }
             );
+            if (model != null && model.startsWith("gpt-5")) {
+                request.put("reasoning_effort", reasoningEffort);
+            }
 
             Map<String, Object> response = restClient.post()
                     .uri(apiUrl)

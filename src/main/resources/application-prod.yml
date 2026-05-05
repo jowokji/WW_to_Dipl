@@ -31,6 +31,8 @@ llm:
   api:
     key: ${LLM_API_KEY}
     model: ${LLM_MODEL:gpt-5}
+    max-completion-tokens: ${LLM_MAX_COMPLETION_TOKENS:500}
+    reasoning-effort: ${LLM_REASONING_EFFORT:minimal}
     url: ${LLM_API_URL:https://api.openai.com/v1/chat/completions}
 
 openapi:

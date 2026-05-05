@@ -130,10 +130,6 @@ final class ApiClient {
             return "HTTP 403: This action requires a valid login.";
         }
 
-        if (status >= 500) {
-            return "HTTP " + status + ": Backend error. Check Docker logs.";
-        }
-
         if (responseBody == null || responseBody.trim().isEmpty()) {
             return "HTTP " + status;
         }
@@ -145,6 +141,10 @@ final class ApiClient {
                 return "HTTP " + status + ": " + message;
             }
         } catch (Exception ignored) {
+        }
+
+        if (status >= 500) {
+            return "HTTP " + status + ": Backend error. Check Docker logs.";
         }
 
         return "HTTP " + status + ": " + responseBody;

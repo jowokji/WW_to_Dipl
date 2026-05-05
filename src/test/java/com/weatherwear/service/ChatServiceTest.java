@@ -195,6 +195,36 @@ class ChatServiceTest {
                 .isInstanceOf(LlmApiException.class);
     }
 
+    @Test
+    void blankLlmAnswer_throwsExceptionBeforeSavingAssistantMessage() {
+        User user = user();
+        ChatRequest request = request();
+
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+        when(sessionRepository.save(any(ChatSession.class))).thenAnswer(invocation -> {
+            ChatSession session = invocation.getArgument(0);
+            session.setId(1L);
+            return session;
+        });
+        when(weatherService.getWeatherByCity("Vilnius")).thenReturn(weatherResponse());
+        when(messageRepository.findTop10BySessionOrderByCreatedAtDesc(any(ChatSession.class)))
+                .thenReturn(List.of());
+        when(messageRepository.save(any(ChatMessage.class))).thenAnswer(invocation -> {
+            ChatMessage message = invocation.getArgument(0);
+            message.setCreatedAt(LocalDateTime.of(2026, 4, 29, 12, 0));
+            return message;
+        });
+        when(llmClient.generateRecommendation(any(String.class))).thenReturn("   ");
+
+        assertThatThrownBy(() -> chatService.sendMessage(request))
+                .isInstanceOf(LlmApiException.class)
+                .hasMessage("AI assistant returned an empty response");
+
+        ArgumentCaptor<ChatMessage> messageCaptor = ArgumentCaptor.forClass(ChatMessage.class);
+        verify(messageRepository).save(messageCaptor.capture());
+        assertThat(messageCaptor.getValue().getRole()).isEqualTo(ChatRole.USER);
+    }
+
     private ChatRequest request() {
         ChatRequest request = new ChatRequest();
         request.setMessage("What should I wear?");

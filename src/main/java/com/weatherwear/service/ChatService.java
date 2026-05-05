@@ -10,6 +10,7 @@ import com.weatherwear.dto.weather.WeatherResponse;
 import com.weatherwear.entity.ChatMessage;
 import com.weatherwear.entity.ChatSession;
 import com.weatherwear.entity.User;
+import com.weatherwear.exception.LlmApiException;
 import com.weatherwear.exception.ResourceNotFoundException;
 import com.weatherwear.repository.ChatMessageRepository;
 import com.weatherwear.repository.ChatSessionRepository;
@@ -46,6 +47,9 @@ public class ChatService {
         String prompt = buildChatPrompt(session, request);
 
         String answer = llmClient.generateRecommendation(prompt);
+        if (answer == null || answer.isBlank()) {
+            throw new LlmApiException("AI assistant returned an empty response");
+        }
 
         ChatMessage assistantMessage = ChatMessage.builder()
                 .session(session)

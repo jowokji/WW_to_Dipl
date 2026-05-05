@@ -54,4 +54,14 @@ class LlmResponseParserTest {
 
         assertThat(parser.parseContent(response)).isEqualTo("No response from AI assistant.");
     }
+
+    @Test
+    void parseContent_blankContent_returnsFallback() {
+        Map<String, Object> response = Map.of(
+                "choices",
+                List.of(Map.of("message", Map.of("content", "   ")))
+        );
+
+        assertThat(parser.parseContent(response)).isEqualTo("No response from AI assistant.");
+    }
 }

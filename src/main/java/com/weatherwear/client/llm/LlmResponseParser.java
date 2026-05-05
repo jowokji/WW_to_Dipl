@@ -32,6 +32,10 @@ public class LlmResponseParser {
 
         Object content = message.get("content");
 
-        return content != null ? content.toString() : "No response from AI assistant.";
+        if (content == null || content.toString().isBlank()) {
+            return "No response from AI assistant.";
+        }
+
+        return content.toString();
     }
 }

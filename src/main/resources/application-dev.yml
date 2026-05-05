@@ -28,4 +28,5 @@ weather:
 llm:
   api:
     key: ${LLM_API_KEY:}
+    model: ${LLM_MODEL:gpt-5}
     url: "https://api.openai.com/v1/chat/completions"

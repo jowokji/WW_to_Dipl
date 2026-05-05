@@ -29,17 +29,20 @@ public class LlmClient {
     @Value("${llm.api.key}")
     private String apiKey;
 
+    @Value("${llm.api.model:gpt-5}")
+    private String model;
+
     public String generateRecommendation(String prompt) {
         try {
             Map<String, Object> request = Map.of(
-                    "model", "gpt-4o-mini",
+                    "model", model,
                     "messages", new Object[]{
                             Map.of("role", "system", "content", SYSTEM_INSTRUCTIONS),
                             Map.of("role", "user", "content", prompt)
                     }
             );
 
-            Map<String, Object> response = restClient.post()
+            Map response = restClient.post()
                     .uri(apiUrl)
                     .header("Authorization", "Bearer " + apiKey)
                     .header("Content-Type", "application/json")

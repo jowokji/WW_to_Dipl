@@ -12,6 +12,8 @@ Added:
 - Shared Java OpenAPI example constants for consistent request, response, and error examples.
 - Missing success-response examples in `openapi/weatherwear-api.openapi.json`.
 - Embedded component and request-response lifecycle diagrams in the architecture overview.
+- PNG exports for all API architecture diagrams under `architecture/png/`.
+- Local Pillow renderer script for regenerating diagram PNG files.
 - Validation notes for JSON syntax, internal `$ref` resolution, example coverage, and Maven tests.
 
 ## 1.0.0 - 2026-04-30

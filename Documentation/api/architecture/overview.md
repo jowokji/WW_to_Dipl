@@ -30,6 +30,10 @@ Source file:
 Documentation/api/architecture/system-context.mmd
 ```
 
+PNG export:
+
+![System context diagram](png/system-context.png)
+
 ## Main Modules
 
 | Module | Java package | Responsibility |
@@ -92,6 +96,10 @@ Source file:
 Documentation/api/architecture/component-diagram.mmd
 ```
 
+PNG export:
+
+![Component diagram](png/component-diagram.png)
+
 ## Resource Model
 
 | Resource | Meaning |
@@ -138,6 +146,10 @@ Source file:
 Documentation/api/architecture/recommendation-sequence.mmd
 ```
 
+PNG export:
+
+![Recommendation request flow sequence diagram](png/recommendation-sequence.png)
+
 ## Chat Request Flow
 
 ```mermaid
@@ -168,6 +180,10 @@ Source file:
 ```text
 Documentation/api/architecture/chat-sequence.mmd
 ```
+
+PNG export:
+
+![Chat request flow sequence diagram](png/chat-sequence.png)
 
 ## Request Lifecycle
 
@@ -216,6 +232,10 @@ Source file:
 ```text
 Documentation/api/architecture/request-lifecycle.mmd
 ```
+
+PNG export:
+
+![Request-response lifecycle diagram](png/request-lifecycle.png)
 
 ## Cross-Service Contract Notes
 

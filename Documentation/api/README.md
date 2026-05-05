@@ -62,7 +62,7 @@ The runtime Swagger UI is enriched with controller-level OpenAPI annotations, DT
 | `reference/` | Endpoint reference, data models, errors, limits, versioning |
 | `guides/` | Getting started, authentication, step-by-step integration tutorial |
 | `examples/` | Runnable cURL-style examples and sample responses |
-| `architecture/` | System context, component diagram, request lifecycle, and sequence diagrams |
+| `architecture/` | System context, component diagram, request lifecycle, sequence diagrams, and PNG exports |
 | `strategy/` | Documentation strategy, validation notes, changelog |
 
 ## Requirement Coverage
@@ -80,6 +80,7 @@ The runtime Swagger UI is enriched with controller-level OpenAPI annotations, DT
 | Architecture overview | `architecture/overview.md` and `.mmd` diagrams |
 | Component/dependency diagram | `architecture/component-diagram.mmd` embedded in `architecture/overview.md` |
 | Request-response lifecycle | `architecture/request-lifecycle.mmd` embedded in `architecture/overview.md` |
+| PNG diagram exports | `architecture/png/*.png` embedded in `architecture/overview.md` |
 | Documentation strategy | `strategy/documentation-strategy.md` |
 | Versioning and changelog | `reference/versioning-and-limits.md`, `strategy/changelog.md` |
 | Validation report | `strategy/validation.md` |

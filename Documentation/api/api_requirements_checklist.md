@@ -28,6 +28,7 @@ This checklist maps the diploma API documentation requirements to the WeatherWea
 | Request flow diagram | Done | `architecture/recommendation-sequence.mmd`, `chat-sequence.mmd` |
 | Request-response lifecycle diagram | Done | `architecture/request-lifecycle.mmd` |
 | Component/dependency diagram | Done | `architecture/component-diagram.mmd` |
+| PNG diagram exports | Done | `architecture/png/system-context.png`, `component-diagram.png`, `recommendation-sequence.png`, `chat-sequence.png`, `request-lifecycle.png` |
 | Modules/resources explanation | Done | `architecture/overview.md` |
 | Developer-accessible format | Done | Markdown documentation repository plus Swagger UI route |
 | Documentation strategy | Done | `strategy/documentation-strategy.md` |

@@ -329,13 +329,15 @@ public class MainActivity extends Activity {
                 setLoading(weatherButton, false);
                 try {
                     JSONObject json = new JSONObject(response);
-                    String responseCity = json.optString("city");
-                    lastWeatherCity = responseCity.trim().isEmpty() ? city : responseCity;
+                    String displayCity = englishCityName(city.trim().isEmpty()
+                            ? json.optString("city")
+                            : city);
+                    lastWeatherCity = displayCity;
                     if (recommendationCityInput.getText().toString().trim().isEmpty()) {
                         recommendationCityInput.setText(lastWeatherCity);
                     }
 
-                    String result = "City: " + json.optString("city") + "\n"
+                    String result = "City: " + displayCity + "\n"
                             + "Temperature: " + json.optDouble("temperature") + " C\n"
                             + "Wind: " + json.optDouble("windSpeed") + " m/s\n"
                             + "Humidity: " + json.optInt("humidity") + "%\n"
@@ -466,7 +468,7 @@ public class MainActivity extends Activity {
                         JSONObject item = items.getJSONObject(index);
                         builder.append(item.optString("createdAt"))
                                 .append("\n")
-                                .append(item.optString("city"))
+                                .append(englishCityName(item.optString("city")))
                                 .append("\n")
                                 .append(item.optString("weatherSummary"))
                                 .append("\n")
@@ -578,7 +580,7 @@ public class MainActivity extends Activity {
     private String formatRecommendation(JSONObject json) {
         StringBuilder builder = new StringBuilder();
 
-        String city = json.optString("city");
+        String city = englishCityName(json.optString("city"));
         if (!city.trim().isEmpty()) {
             builder.append("City: ").append(city).append("\n\n");
         }
@@ -590,6 +592,193 @@ public class MainActivity extends Activity {
 
         builder.append(json.optString("recommendation"));
         return builder.toString();
+    }
+
+    private String englishCityName(String value) {
+        String city = value == null ? "" : value.trim();
+        if (city.isEmpty()) {
+            return "";
+        }
+
+        String lower = city.toLowerCase();
+        switch (lower) {
+            case "вильнюс":
+                return "Vilnius";
+            case "каунас":
+                return "Kaunas";
+            case "клайпеда":
+                return "Klaipeda";
+            case "рига":
+                return "Riga";
+            case "таллин":
+            case "таллинн":
+                return "Tallinn";
+            case "варшава":
+                return "Warsaw";
+            case "минск":
+                return "Minsk";
+            case "киев":
+            case "київ":
+                return "Kyiv";
+            case "москва":
+                return "Moscow";
+            case "санкт-петербург":
+                return "Saint Petersburg";
+            case "лондон":
+                return "London";
+            case "париж":
+                return "Paris";
+            case "берлин":
+                return "Berlin";
+            default:
+                return transliterateCyrillic(city);
+        }
+    }
+
+    private String transliterateCyrillic(String value) {
+        StringBuilder builder = new StringBuilder();
+        for (int index = 0; index < value.length(); index++) {
+            char character = value.charAt(index);
+            builder.append(transliterateCharacter(character));
+        }
+        return builder.toString();
+    }
+
+    private String transliterateCharacter(char character) {
+        switch (character) {
+            case 'А':
+                return "A";
+            case 'Б':
+                return "B";
+            case 'В':
+                return "V";
+            case 'Г':
+                return "G";
+            case 'Д':
+                return "D";
+            case 'Е':
+            case 'Ё':
+                return "E";
+            case 'Ж':
+                return "Zh";
+            case 'З':
+                return "Z";
+            case 'И':
+            case 'І':
+                return "I";
+            case 'Й':
+                return "Y";
+            case 'К':
+                return "K";
+            case 'Л':
+                return "L";
+            case 'М':
+                return "M";
+            case 'Н':
+                return "N";
+            case 'О':
+                return "O";
+            case 'П':
+                return "P";
+            case 'Р':
+                return "R";
+            case 'С':
+                return "S";
+            case 'Т':
+                return "T";
+            case 'У':
+                return "U";
+            case 'Ф':
+                return "F";
+            case 'Х':
+                return "Kh";
+            case 'Ц':
+                return "Ts";
+            case 'Ч':
+                return "Ch";
+            case 'Ш':
+                return "Sh";
+            case 'Щ':
+                return "Shch";
+            case 'Ы':
+                return "Y";
+            case 'Э':
+                return "E";
+            case 'Ю':
+                return "Yu";
+            case 'Я':
+                return "Ya";
+            case 'Ь':
+            case 'Ъ':
+                return "";
+            case 'а':
+                return "a";
+            case 'б':
+                return "b";
+            case 'в':
+                return "v";
+            case 'г':
+                return "g";
+            case 'д':
+                return "d";
+            case 'е':
+            case 'ё':
+                return "e";
+            case 'ж':
+                return "zh";
+            case 'з':
+                return "z";
+            case 'и':
+            case 'і':
+                return "i";
+            case 'й':
+                return "y";
+            case 'к':
+                return "k";
+            case 'л':
+                return "l";
+            case 'м':
+                return "m";
+            case 'н':
+                return "n";
+            case 'о':
+                return "o";
+            case 'п':
+                return "p";
+            case 'р':
+                return "r";
+            case 'с':
+                return "s";
+            case 'т':
+                return "t";
+            case 'у':
+                return "u";
+            case 'ф':
+                return "f";
+            case 'х':
+                return "kh";
+            case 'ц':
+                return "ts";
+            case 'ч':
+                return "ch";
+            case 'ш':
+                return "sh";
+            case 'щ':
+                return "shch";
+            case 'ы':
+                return "y";
+            case 'э':
+                return "e";
+            case 'ю':
+                return "yu";
+            case 'я':
+                return "ya";
+            case 'ь':
+            case 'ъ':
+                return "";
+            default:
+                return String.valueOf(character);
+        }
     }
 
     private void showScreen(LinearLayout visibleScreen) {

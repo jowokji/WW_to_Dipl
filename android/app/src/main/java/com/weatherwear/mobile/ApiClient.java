@@ -158,7 +158,7 @@ final class ApiClient {
 
         String lower = message.toLowerCase();
         if (lower.contains("failed to connect") || lower.contains("connection refused")) {
-            return "Backend is unavailable. Start Docker and check the Backend URL.";
+            return "Backend is unavailable. Start Docker and check app configuration.";
         }
 
         if (lower.contains("timeout")) {

@@ -1,0 +1,170 @@
+{
+  "input": "C:\\Users\\nikit\\IdeaProjects\\WW_to_Dipl\\docx_work\\WeatherWear_Explanatory_Note_Dubrovin_Mikita.cleaned.docx",
+  "fonts_by_char_count": {
+    "Times New Roman": 40737
+  },
+  "direct_run_formatting_runs": 1064,
+  "direct_paragraph_formatting_paragraphs": 836,
+  "heading_like_paragraphs_not_heading_style": [
+    {
+      "para_index": 3,
+      "text": "WeatherWear",
+      "style": "Title"
+    },
+    {
+      "para_index": 316,
+      "text": "Field",
+      "style": "Normal"
+    },
+    {
+      "para_index": 317,
+      "text": "Value",
+      "style": "Normal"
+    },
+    {
+      "para_index": 330,
+      "text": "Field",
+      "style": "Normal"
+    },
+    {
+      "para_index": 331,
+      "text": "Value",
+      "style": "Normal"
+    },
+    {
+      "para_index": 350,
+      "text": "Resource",
+      "style": "Normal"
+    },
+    {
+      "para_index": 351,
+      "text": "URL or path",
+      "style": "Normal"
+    },
+    {
+      "para_index": 364,
+      "text": "#",
+      "style": "Normal"
+    },
+    {
+      "para_index": 365,
+      "text": "Criterion",
+      "style": "Normal"
+    },
+    {
+      "para_index": 366,
+      "text": "Status and Evidence",
+      "style": "Normal"
+    },
+    {
+      "para_index": 394,
+      "text": "Aspect",
+      "style": "Normal"
+    },
+    {
+      "para_index": 395,
+      "text": "Description",
+      "style": "Normal"
+    },
+    {
+      "para_index": 408,
+      "text": "#",
+      "style": "Normal"
+    },
+    {
+      "para_index": 409,
+      "text": "Pain point",
+      "style": "Normal"
+    },
+    {
+      "para_index": 410,
+      "text": "Impact",
+      "style": "Normal"
+    },
+    {
+      "para_index": 426,
+      "text": "Aspect",
+      "style": "Normal"
+    },
+    {
+      "para_index": 427,
+      "text": "Before",
+      "style": "Normal"
+    },
+    {
+      "para_index": 428,
+      "text": "After WeatherWear",
+      "style": "Normal"
+    },
+    {
+      "para_index": 444,
+      "text": "Goal",
+      "style": "Normal"
+    },
+    {
+      "para_index": 445,
+      "text": "Description",
+      "style": "Normal"
+    }
+  ],
+  "examples": {
+    "direct_run_formatting": [
+      {
+        "para_index": 3,
+        "run_text": "WeatherWear",
+        "style": "Title"
+      },
+      {
+        "para_index": 4,
+        "run_text": "Explanatory Note for the Diploma Project",
+        "style": "Subtitle"
+      },
+      {
+        "para_index": 5,
+        "run_text": "Mobile application in Java for weather forecast and clothing recommendations wit",
+        "style": "Subtitle"
+      },
+      {
+        "para_index": 8,
+        "run_text": "This document was assembled from the approved topic statement, business analysis",
+        "style": "Normal"
+      },
+      {
+        "para_index": 10,
+        "run_text": "Contents",
+        "style": "Heading 1"
+      }
+    ],
+    "direct_paragraph_formatting": [
+      {
+        "para_index": 11,
+        "text": "WeatherWear",
+        "style": "Normal"
+      },
+      {
+        "para_index": 12,
+        "text": "Project Overview",
+        "style": "Normal"
+      },
+      {
+        "para_index": 13,
+        "text": "Problem Statement and Goals",
+        "style": "Normal"
+      },
+      {
+        "para_index": 14,
+        "text": "Stakeholders and Users",
+        "style": "Normal"
+      },
+      {
+        "para_index": 15,
+        "text": "Project Scope",
+        "style": "Normal"
+      }
+    ]
+  },
+  "notes": [
+    "Direct formatting is not always wrong, but it often causes inconsistent output when templates change.",
+    "Heading-like paragraphs not using Heading styles can break TOC and accessibility."
+  ]
+}

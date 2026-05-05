@@ -32,16 +32,18 @@ public class MainActivity extends Activity {
     private static final String KEY_BASE_URL = "baseUrl";
     private static final String DEFAULT_BASE_URL = "http://10.0.2.2:8090/api";
 
-    private static final int COLOR_BACKGROUND = Color.rgb(246, 248, 250);
+    private static final int COLOR_BACKGROUND = Color.rgb(243, 244, 246);
     private static final int COLOR_SURFACE = Color.WHITE;
-    private static final int COLOR_PRIMARY = Color.rgb(29, 111, 95);
-    private static final int COLOR_PRIMARY_DARK = Color.rgb(20, 86, 74);
-    private static final int COLOR_TEXT = Color.rgb(25, 32, 38);
-    private static final int COLOR_MUTED = Color.rgb(92, 102, 112);
-    private static final int COLOR_BORDER = Color.rgb(216, 224, 232);
-    private static final int COLOR_FIELD = Color.rgb(250, 252, 253);
-    private static final int COLOR_DANGER = Color.rgb(190, 64, 64);
-    private static final int COLOR_SUCCESS = Color.rgb(36, 133, 88);
+    private static final int COLOR_OUTPUT_SURFACE = Color.rgb(250, 251, 252);
+    private static final int COLOR_PRIMARY = Color.rgb(47, 52, 58);
+    private static final int COLOR_PRIMARY_DARK = Color.rgb(31, 36, 42);
+    private static final int COLOR_TEXT = Color.rgb(31, 35, 40);
+    private static final int COLOR_MUTED = Color.rgb(104, 112, 121);
+    private static final int COLOR_BORDER = Color.rgb(218, 224, 231);
+    private static final int COLOR_SOFT_BORDER = Color.rgb(232, 236, 241);
+    private static final int COLOR_FIELD = Color.WHITE;
+    private static final int COLOR_DANGER = Color.rgb(137, 82, 82);
+    private static final int COLOR_SUCCESS = Color.rgb(84, 94, 105);
 
     private ApiClient apiClient;
     private SharedPreferences preferences;
@@ -49,8 +51,7 @@ public class MainActivity extends Activity {
     private String lastWeatherCity = "";
     private Long chatSessionId;
 
-    private View statusDot;
-    private EditText baseUrlInput;
+    private TextView statusChip;
     private EditText emailInput;
     private EditText passwordInput;
     private EditText weatherCityInput;
@@ -58,7 +59,6 @@ public class MainActivity extends Activity {
     private EditText occasionInput;
     private EditText chatMessageInput;
 
-    private TextView statusView;
     private TextView authOutput;
     private TextView weatherOutput;
     private TextView recommendationOutput;
@@ -84,6 +84,7 @@ public class MainActivity extends Activity {
     private Button chatSendButton;
     private Button historyLoadButton;
     private Button historyClearButton;
+    private Button signOutButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +94,7 @@ public class MainActivity extends Activity {
         token = preferences.getString(KEY_TOKEN, "");
         apiClient = new ApiClient(new Handler(Looper.getMainLooper()));
 
+        applySystemBars();
         buildUi();
         updateStatus();
         showScreen(hasToken() ? weatherScreen : loginScreen);
@@ -104,14 +106,13 @@ public class MainActivity extends Activity {
         scrollView.setBackgroundColor(COLOR_BACKGROUND);
 
         LinearLayout root = verticalLayout();
-        root.setPadding(dp(18), dp(18), dp(18), dp(24));
+        root.setPadding(dp(18), dp(30), dp(18), dp(24));
         scrollView.addView(root);
 
         root.addView(appHeader());
-        root.addView(serverPanel());
         root.addView(navigation());
 
-        loginScreen = screen("Login / Register");
+        loginScreen = screen("Account");
         weatherScreen = screen("Weather");
         recommendationScreen = screen("Recommendation");
         chatScreen = screen("Chat");
@@ -134,51 +135,29 @@ public class MainActivity extends Activity {
 
     private View appHeader() {
         LinearLayout header = verticalLayout();
-        header.setPadding(0, dp(4), 0, dp(12));
+        header.setPadding(0, dp(2), 0, dp(8));
 
         TextView title = text("WeatherWear");
-        title.setTextSize(28);
+        title.setTextSize(30);
         title.setTextColor(COLOR_TEXT);
-        title.setTypeface(Typeface.DEFAULT_BOLD);
+        title.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
         title.setIncludeFontPadding(false);
         header.addView(title);
 
         LinearLayout statusRow = new LinearLayout(this);
         statusRow.setOrientation(LinearLayout.HORIZONTAL);
         statusRow.setGravity(Gravity.CENTER_VERTICAL);
-        statusRow.setPadding(0, dp(8), 0, 0);
+        statusRow.setPadding(0, dp(10), 0, 0);
 
-        statusDot = new View(this);
-        LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(dp(10), dp(10));
-        dotParams.setMargins(0, 0, dp(8), 0);
-        statusRow.addView(statusDot, dotParams);
-
-        statusView = text("");
-        statusView.setTextSize(14);
-        statusView.setTextColor(COLOR_MUTED);
-        statusRow.addView(statusView);
+        statusChip = text("");
+        statusChip.setTextSize(13);
+        statusChip.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+        statusChip.setIncludeFontPadding(false);
+        statusChip.setPadding(dp(10), dp(6), dp(10), dp(6));
+        statusRow.addView(statusChip);
 
         header.addView(statusRow);
         return header;
-    }
-
-    private View serverPanel() {
-        LinearLayout panel = verticalLayout();
-        panel.setPadding(dp(14), dp(12), dp(14), dp(12));
-        panel.setBackground(panelBackground(COLOR_SURFACE, COLOR_BORDER));
-
-        TextView label = label("Backend URL");
-        panel.addView(label);
-
-        baseUrlInput = input("http://10.0.2.2:8090/api", false);
-        baseUrlInput.setSingleLine(true);
-        baseUrlInput.setText(preferences.getString(KEY_BASE_URL, DEFAULT_BASE_URL));
-        panel.addView(baseUrlInput);
-
-        LinearLayout.LayoutParams params = matchWrap();
-        params.setMargins(0, 0, 0, dp(12));
-        panel.setLayoutParams(params);
-        return panel;
     }
 
     private View navigation() {
@@ -187,9 +166,9 @@ public class MainActivity extends Activity {
 
         LinearLayout navigation = new LinearLayout(this);
         navigation.setOrientation(LinearLayout.HORIZONTAL);
-        navigation.setPadding(0, dp(4), 0, dp(12));
+        navigation.setPadding(0, dp(2), 0, dp(16));
 
-        loginTab = tabButton("Login", () -> showScreen(loginScreen));
+        loginTab = tabButton("Account", () -> showScreen(loginScreen));
         weatherTab = tabButton("Weather", () -> showScreen(weatherScreen));
         recommendationTab = tabButton("Recommend", () -> showScreen(recommendationScreen));
         chatTab = tabButton("Chat", () -> showScreen(chatScreen));
@@ -221,7 +200,8 @@ public class MainActivity extends Activity {
         actions.addView(loginButton);
         loginScreen.addView(actions);
 
-        loginScreen.addView(secondaryButton("Clear token", this::clearToken));
+        signOutButton = secondaryButton("Sign out", this::clearToken);
+        loginScreen.addView(signOutButton);
         loginScreen.addView(authOutput);
     }
 
@@ -554,23 +534,29 @@ public class MainActivity extends Activity {
     }
 
     private String currentBaseUrl() {
-        String baseUrl = baseUrlInput.getText().toString().trim();
-        if (baseUrl.isEmpty()) {
+        String baseUrl = preferences.getString(KEY_BASE_URL, DEFAULT_BASE_URL);
+        if (baseUrl == null || baseUrl.trim().isEmpty()) {
             baseUrl = DEFAULT_BASE_URL;
-            baseUrlInput.setText(baseUrl);
         }
 
         preferences.edit()
-                .putString(KEY_BASE_URL, baseUrl)
+                .putString(KEY_BASE_URL, baseUrl.trim())
                 .apply();
 
-        return baseUrl;
+        return baseUrl.trim();
     }
 
     private void updateStatus() {
         boolean signedIn = hasToken();
-        statusView.setText(signedIn ? "Signed in" : "Not signed in");
-        statusDot.setBackground(circle(signedIn ? COLOR_SUCCESS : COLOR_DANGER));
+        statusChip.setText(signedIn ? "Signed in" : "Not signed in");
+        statusChip.setTextColor(signedIn ? COLOR_PRIMARY_DARK : COLOR_DANGER);
+        statusChip.setBackground(chipBackground(
+                signedIn ? Color.rgb(238, 240, 242) : Color.rgb(250, 241, 241),
+                signedIn ? Color.rgb(222, 226, 231) : Color.rgb(235, 211, 211)
+        ));
+        if (signOutButton != null) {
+            signOutButton.setVisibility(signedIn ? View.VISIBLE : View.GONE);
+        }
     }
 
     private boolean hasToken() {
@@ -624,17 +610,18 @@ public class MainActivity extends Activity {
 
     private LinearLayout screen(String title) {
         LinearLayout layout = verticalLayout();
-        layout.setPadding(dp(16), dp(16), dp(16), dp(18));
+        layout.setPadding(dp(16), dp(17), dp(16), dp(18));
         layout.setBackground(panelBackground(COLOR_SURFACE, COLOR_BORDER));
+        layout.setElevation(dp(2));
 
         LinearLayout.LayoutParams params = matchWrap();
         params.setMargins(0, 0, 0, dp(16));
         layout.setLayoutParams(params);
 
         TextView titleView = text(title);
-        titleView.setTextSize(22);
+        titleView.setTextSize(20);
         titleView.setTextColor(COLOR_TEXT);
-        titleView.setTypeface(Typeface.DEFAULT_BOLD);
+        titleView.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
         titleView.setPadding(0, 0, 0, dp(12));
         layout.addView(titleView);
         return layout;
@@ -684,12 +671,12 @@ public class MainActivity extends Activity {
 
     private TextView output(String emptyText) {
         TextView view = text(emptyText);
-        view.setTypeface(Typeface.MONOSPACE);
         view.setTextIsSelectable(true);
-        view.setTextColor(COLOR_TEXT);
-        view.setMinHeight(dp(96));
-        view.setPadding(dp(12), dp(12), dp(12), dp(12));
-        view.setBackground(panelBackground(COLOR_FIELD, COLOR_BORDER));
+        view.setTextColor(COLOR_MUTED);
+        view.setTextSize(14);
+        view.setMinHeight(dp(88));
+        view.setPadding(dp(12), dp(11), dp(12), dp(11));
+        view.setBackground(panelBackground(COLOR_OUTPUT_SURFACE, COLOR_SOFT_BORDER));
 
         LinearLayout.LayoutParams params = matchWrap();
         params.setMargins(0, dp(12), 0, 0);
@@ -708,6 +695,7 @@ public class MainActivity extends Activity {
                 ? InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD
                 : InputType.TYPE_CLASS_TEXT);
         editText.setMinHeight(dp(48));
+        editText.setElevation(dp(0));
         editText.setBackground(panelBackground(COLOR_FIELD, COLOR_BORDER));
         editText.setPadding(dp(12), 0, dp(12), 0);
         editText.setSelectAllOnFocus(false);
@@ -716,13 +704,15 @@ public class MainActivity extends Activity {
 
     private Button tabButton(String text, Runnable action) {
         Button button = buttonBase(text, action);
-        button.setTextSize(14);
-        button.setMinHeight(dp(42));
+        button.setTextSize(13);
+        button.setMinHeight(dp(38));
+        button.setMinimumHeight(dp(38));
+        button.setPadding(dp(12), 0, dp(12), 0);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                dp(42)
+                dp(38)
         );
-        params.setMargins(0, 0, dp(8), 0);
+        params.setMargins(0, 0, dp(7), 0);
         button.setLayoutParams(params);
         return button;
     }
@@ -737,7 +727,7 @@ public class MainActivity extends Activity {
     private Button secondaryButton(String text, Runnable action) {
         Button button = buttonBase(text, action);
         button.setTextColor(COLOR_PRIMARY_DARK);
-        button.setBackground(buttonBackground(Color.rgb(237, 246, 243), Color.rgb(205, 227, 219)));
+        button.setBackground(buttonBackground(COLOR_SURFACE, COLOR_BORDER));
         return withFullWidthMargins(button);
     }
 
@@ -745,8 +735,11 @@ public class MainActivity extends Activity {
         Button button = new Button(this);
         button.setText(text);
         button.setAllCaps(false);
-        button.setTextSize(15);
-        button.setMinHeight(dp(48));
+        button.setTextSize(14);
+        button.setMinWidth(0);
+        button.setMinimumWidth(0);
+        button.setMinHeight(dp(46));
+        button.setMinimumHeight(dp(46));
         button.setPadding(dp(14), 0, dp(14), 0);
         button.setOnClickListener(view -> action.run());
         return button;
@@ -755,7 +748,7 @@ public class MainActivity extends Activity {
     private Button withFullWidthMargins(Button button) {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(48)
+                dp(46)
         );
         params.setMargins(0, 0, 0, dp(10));
         button.setLayoutParams(params);
@@ -765,7 +758,7 @@ public class MainActivity extends Activity {
     private Button weightedButton(Button button) {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 0,
-                dp(48),
+                dp(46),
                 1f
         );
         params.setMargins(0, 0, dp(8), dp(10));
@@ -781,7 +774,15 @@ public class MainActivity extends Activity {
         button.setTextColor(selected ? Color.WHITE : COLOR_PRIMARY_DARK);
         button.setBackground(selected
                 ? buttonBackground(COLOR_PRIMARY, COLOR_PRIMARY)
-                : buttonBackground(Color.rgb(237, 246, 243), Color.rgb(205, 227, 219)));
+                : buttonBackground(COLOR_SURFACE, COLOR_BORDER));
+    }
+
+    private void applySystemBars() {
+        getWindow().setStatusBarColor(COLOR_BACKGROUND);
+        getWindow().setNavigationBarColor(COLOR_SURFACE);
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        );
     }
 
     private void setLoading(Button button, boolean loading) {
@@ -797,7 +798,7 @@ public class MainActivity extends Activity {
         GradientDrawable drawable = new GradientDrawable();
         drawable.setShape(GradientDrawable.RECTANGLE);
         drawable.setColor(fillColor);
-        drawable.setCornerRadius(dp(8));
+        drawable.setCornerRadius(dp(10));
         drawable.setStroke(dp(1), strokeColor);
         return drawable;
     }
@@ -806,15 +807,17 @@ public class MainActivity extends Activity {
         GradientDrawable drawable = new GradientDrawable();
         drawable.setShape(GradientDrawable.RECTANGLE);
         drawable.setColor(fillColor);
-        drawable.setCornerRadius(dp(8));
+        drawable.setCornerRadius(dp(10));
         drawable.setStroke(dp(1), strokeColor);
         return drawable;
     }
 
-    private GradientDrawable circle(int color) {
+    private GradientDrawable chipBackground(int fillColor, int strokeColor) {
         GradientDrawable drawable = new GradientDrawable();
-        drawable.setShape(GradientDrawable.OVAL);
-        drawable.setColor(color);
+        drawable.setShape(GradientDrawable.RECTANGLE);
+        drawable.setColor(fillColor);
+        drawable.setCornerRadius(dp(18));
+        drawable.setStroke(dp(1), strokeColor);
         return drawable;
     }
 

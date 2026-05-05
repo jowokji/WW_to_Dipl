@@ -40,12 +40,12 @@ public class LlmPromptBuilder {
 
                 Occasion: %s
 
-                Give a clear recommendation:
-                1. Top
-                2. Bottom
-                3. Shoes
-                4. Accessories
-                5. Short explanation
+                Give a short practical recommendation in no more than 90 words:
+                1. Top: one short line
+                2. Bottom: one short line
+                3. Shoes: one short line
+                4. Accessories: one short line
+                5. Why: one short line
                 """.formatted(
                 weather.getTemperature(),
                 weather.getFeelsLike(),

@@ -33,7 +33,7 @@ public class LlmClient {
     @Value("${llm.api.model:gpt-5}")
     private String model;
 
-    @Value("${llm.api.max-completion-tokens:500}")
+    @Value("${llm.api.max-completion-tokens:220}")
     private Integer maxCompletionTokens;
 
     @Value("${llm.api.reasoning-effort:minimal}")

@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 
 final class ApiClient {
 
-    private static final int TIMEOUT_MS = 60000;
+    private static final int TIMEOUT_MS = 30000;
     private static final String DEFAULT_BASE_URL = "http://10.0.2.2:8090/api";
 
     private final Handler handler;

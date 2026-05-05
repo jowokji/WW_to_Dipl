@@ -42,7 +42,7 @@ public class LlmClient {
                     }
             );
 
-            Map response = restClient.post()
+            Map<String, Object> response = restClient.post()
                     .uri(apiUrl)
                     .header("Authorization", "Bearer " + apiKey)
                     .header("Content-Type", "application/json")

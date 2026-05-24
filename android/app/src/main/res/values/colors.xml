@@ -1,0 +1,25 @@
+<resources>
+    <color name="weatherwear_background">#F3F4F6</color>
+    <color name="weatherwear_surface">#FFFFFF</color>
+    <color name="weatherwear_output_surface">#FAFBFC</color>
+    <color name="weatherwear_primary">#2F343A</color>
+    <color name="weatherwear_primary_dark">#1F242A</color>
+    <color name="weatherwear_text">#1F2328</color>
+    <color name="weatherwear_muted">#687079</color>
+    <color name="weatherwear_hint">#8A949E</color>
+    <color name="weatherwear_border">#DAE0E7</color>
+    <color name="weatherwear_soft_border">#E8ECF1</color>
+    <color name="weatherwear_field">#FFFFFF</color>
+    <color name="weatherwear_danger">#895252</color>
+    <color name="weatherwear_success">#545E69</color>
+    <color name="weatherwear_blue_fill">#EBF4F9</color>
+    <color name="weatherwear_blue_border">#BED9E7</color>
+    <color name="weatherwear_green_fill">#EDF6F1</color>
+    <color name="weatherwear_green_border">#C4E0CF</color>
+    <color name="weatherwear_warm_fill">#FAF4EA</color>
+    <color name="weatherwear_warm_border">#E7D3B5</color>
+    <color name="weatherwear_status_signed_fill">#EEF0F2</color>
+    <color name="weatherwear_status_signed_border">#DEE2E7</color>
+    <color name="weatherwear_status_signed_out_fill">#FAF1F1</color>
+    <color name="weatherwear_status_signed_out_border">#EBD3D3</color>
+</resources>

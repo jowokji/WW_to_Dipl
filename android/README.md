@@ -1,14 +1,17 @@
 # WeatherWear Android Client
 
-This folder contains a minimal native Android client written in Java. It is intended as a mobile proof for the diploma project and calls the Spring Boot backend over the documented REST API.
+This folder contains a native Android client written in Java. It is intended as a mobile demo for the diploma project and calls the Spring Boot backend over the documented REST API.
 
 ## Features
 
-- Login / Register: email/password, JWT retrieval, token persistence.
-- Home / Weather: city input, `Get weather`, temperature, wind, humidity, and condition output.
-- Recommendation: city plus occasion, `Get recommendation`, LLM answer output.
-- Chat: message input, `Send`, assistant answer output.
-- History: previous recommendations list and `Clear history`.
+- Profile: login/register, JWT persistence, backend URL switching, health check, sign out, and account deletion.
+- Weather: city, coordinates, or `Use my location` lookup with a card-style summary and a quick `Recommend outfit` hand-off.
+- Recommendation: city, coordinates, or `Use my location` recommendation flow with a dedicated outfit card and `View history` hand-off.
+- Preferences: card-based style, weather sensitivity, and comfort settings with a preferred color preview.
+- Feedback: selected recommendation preview, star rating, Like/Dislike quick reactions, comment, recommendation-specific feedback lookup, and feedback deletion.
+- Chat: current-session card, message bubbles, new chat, session list, message history, and session deletion.
+- History: card list of saved recommendations, detail view with weather context and recommendation text, feedback hand-off, and clear-history confirmation.
+- Demo UI: bottom navigation for Weather, Recommend, Chat, History, and Profile; shared colors/dimensions/resources; empty states; Toast errors; and a loading spinner for API calls.
 
 ## Run Locally
 

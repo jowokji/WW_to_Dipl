@@ -8,17 +8,19 @@ import java.util.Map;
 @Component
 public class LlmResponseParser {
 
+    private static final String EMPTY_RESPONSE = "";
+
     @SuppressWarnings("unchecked")
     public String parseContent(Map<String, Object> response) {
         if (response == null || !response.containsKey("choices")) {
-            return "No response from AI assistant.";
+            return EMPTY_RESPONSE;
         }
 
         List<Map<String, Object>> choices =
                 (List<Map<String, Object>>) response.get("choices");
 
         if (choices == null || choices.isEmpty()) {
-            return "No response from AI assistant.";
+            return EMPTY_RESPONSE;
         }
 
         Map<String, Object> firstChoice = choices.get(0);
@@ -27,13 +29,13 @@ public class LlmResponseParser {
                 (Map<String, Object>) firstChoice.get("message");
 
         if (message == null || !message.containsKey("content")) {
-            return "No response from AI assistant.";
+            return EMPTY_RESPONSE;
         }
 
         Object content = message.get("content");
 
         if (content == null || content.toString().isBlank()) {
-            return "No response from AI assistant.";
+            return EMPTY_RESPONSE;
         }
 
         return content.toString();

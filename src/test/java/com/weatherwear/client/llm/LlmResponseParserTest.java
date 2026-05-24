@@ -22,29 +22,27 @@ class LlmResponseParserTest {
     }
 
     @Test
-    void parseContent_nullResponse_returnsFallback() {
-        assertThat(parser.parseContent(null)).isEqualTo("No response from AI assistant.");
+    void parseContent_nullResponse_returnsEmpty() {
+        assertThat(parser.parseContent(null)).isEmpty();
     }
 
     @Test
-    void parseContent_missingChoices_returnsFallback() {
-        assertThat(parser.parseContent(Map.of())).isEqualTo("No response from AI assistant.");
+    void parseContent_missingChoices_returnsEmpty() {
+        assertThat(parser.parseContent(Map.of())).isEmpty();
     }
 
     @Test
-    void parseContent_emptyChoices_returnsFallback() {
-        assertThat(parser.parseContent(Map.of("choices", List.of())))
-                .isEqualTo("No response from AI assistant.");
+    void parseContent_emptyChoices_returnsEmpty() {
+        assertThat(parser.parseContent(Map.of("choices", List.of()))).isEmpty();
     }
 
     @Test
-    void parseContent_missingMessage_returnsFallback() {
-        assertThat(parser.parseContent(Map.of("choices", List.of(Map.of()))))
-                .isEqualTo("No response from AI assistant.");
+    void parseContent_missingMessage_returnsEmpty() {
+        assertThat(parser.parseContent(Map.of("choices", List.of(Map.of())))).isEmpty();
     }
 
     @Test
-    void parseContent_nullContent_returnsFallback() {
+    void parseContent_nullContent_returnsEmpty() {
         Map<String, Object> response = Map.of(
                 "choices",
                 List.of(Map.of("message", new java.util.HashMap<String, Object>() {{
@@ -52,16 +50,16 @@ class LlmResponseParserTest {
                 }}))
         );
 
-        assertThat(parser.parseContent(response)).isEqualTo("No response from AI assistant.");
+        assertThat(parser.parseContent(response)).isEmpty();
     }
 
     @Test
-    void parseContent_blankContent_returnsFallback() {
+    void parseContent_blankContent_returnsEmpty() {
         Map<String, Object> response = Map.of(
                 "choices",
                 List.of(Map.of("message", Map.of("content", "   ")))
         );
 
-        assertThat(parser.parseContent(response)).isEqualTo("No response from AI assistant.");
+        assertThat(parser.parseContent(response)).isEmpty();
     }
 }

@@ -33,13 +33,14 @@ public class LlmClient {
     @Value("${llm.api.model:gpt-5}")
     private String model;
 
-    @Value("${llm.api.max-completion-tokens:220}")
+    @Value("${llm.api.max-completion-tokens:800}")
     private Integer maxCompletionTokens;
 
     @Value("${llm.api.reasoning-effort:minimal}")
     private String reasoningEffort;
 
     public String generateRecommendation(String prompt) {
+        Map<String, Object> response;
         try {
             Map<String, Object> request = new HashMap<>();
             request.put("model", model);
@@ -55,7 +56,7 @@ public class LlmClient {
                 request.put("reasoning_effort", reasoningEffort);
             }
 
-            Map<String, Object> response = restClient.post()
+            response = restClient.post()
                     .uri(apiUrl)
                     .header("Authorization", "Bearer " + apiKey)
                     .header("Content-Type", "application/json")
@@ -63,10 +64,15 @@ public class LlmClient {
                     .retrieve()
                     .body(Map.class);
 
-            return responseParser.parseContent(response);
-
         } catch (Exception ex) {
             throw new LlmApiException("Failed to get response from AI assistant");
         }
+
+        String content = responseParser.parseContent(response);
+        if (content == null || content.isBlank()) {
+            throw new LlmApiException("AI assistant returned an empty response");
+        }
+
+        return content;
     }
 }

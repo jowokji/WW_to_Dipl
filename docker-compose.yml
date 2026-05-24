@@ -39,7 +39,7 @@ services:
 
       LLM_API_KEY: ${LLM_API_KEY:?LLM_API_KEY is required}
       LLM_MODEL: ${LLM_MODEL:-gpt-5}
-      LLM_MAX_COMPLETION_TOKENS: ${LLM_MAX_COMPLETION_TOKENS:-220}
+      LLM_MAX_COMPLETION_TOKENS: ${LLM_MAX_COMPLETION_TOKENS:-800}
       LLM_REASONING_EFFORT: ${LLM_REASONING_EFFORT:-minimal}
       LLM_API_URL: https://api.openai.com/v1/chat/completions
 

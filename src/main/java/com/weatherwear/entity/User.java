@@ -48,7 +48,7 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Автоматическое заполнение дат
+    // Automatically populate timestamps.
 
     @PrePersist
     protected void onCreate() {

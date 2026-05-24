@@ -85,6 +85,10 @@ class ChatServiceTest {
         assertThat(response.getSessionId()).isEqualTo(1L);
         assertThat(response.getAnswer()).isEqualTo("Wear a jacket");
         assertThat(response.getCreatedAt()).isEqualTo(assistantCreatedAt);
+
+        ArgumentCaptor<String> promptCaptor = ArgumentCaptor.forClass(String.class);
+        verify(llmClient).generateRecommendation(promptCaptor.capture());
+        assertThat(promptCaptor.getValue()).contains("Always answer in English");
     }
 
     @Test

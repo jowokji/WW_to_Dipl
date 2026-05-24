@@ -17,10 +17,11 @@ public class LlmPromptBuilder {
     ) {
         return """
                 You are a professional stylist.
+                Always answer in English, even if the occasion or user context is written in another language.
 
                 Weather:
-                Temperature: %s°C
-                Feels like: %s°C
+                Temperature: %s C
+                Feels like: %s C
                 Wind: %s m/s
                 Condition: %s
                 Humidity: %s%%

@@ -33,6 +33,7 @@ class LlmPromptBuilderTest {
         String prompt = promptBuilder.buildPrompt(weather(), preference, "work");
 
         assertThat(prompt)
+                .contains("Always answer in English")
                 .contains("Temperature: 12.0")
                 .contains("Feels like: 10.0")
                 .contains("Wind: 4.5")

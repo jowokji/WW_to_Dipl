@@ -17,6 +17,7 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Patterns;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,8 @@ import android.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -50,6 +53,8 @@ public class MainActivity extends Activity {
     private static final int LOCATION_TARGET_NONE = 0;
     private static final int LOCATION_TARGET_WEATHER = 1;
     private static final int LOCATION_TARGET_RECOMMENDATION = 2;
+    private static final int MIN_REGISTER_PASSWORD_LENGTH = 6;
+    private static final int MAX_CITY_LENGTH = 120;
 
     private static final String[] STYLE_VALUES = {
             "CASUAL", "BUSINESS", "SPORTY", "STREETWEAR", "ELEGANT", "MINIMALIST"
@@ -141,6 +146,10 @@ public class MainActivity extends Activity {
     private TextView chatOutput;
     private TextView historyOutput;
     private TextView feedbackOutput;
+    private LinearLayout weatherLoadingIndicator;
+    private LinearLayout recommendationLoadingIndicator;
+    private LinearLayout chatLoadingIndicator;
+    private LinearLayout historyLoadingIndicator;
 
     private LinearLayout chatSessionPanel;
     private TextView chatSessionTitle;
@@ -461,6 +470,8 @@ public class MainActivity extends Activity {
         weatherScreen.addView(weatherCoordinatesButton);
         weatherLocationButton = secondaryButton(s(R.string.button_use_my_location), this::useLocationForWeather);
         weatherScreen.addView(weatherLocationButton);
+        weatherLoadingIndicator = loadingIndicator(s(R.string.status_loading_weather));
+        weatherScreen.addView(weatherLoadingIndicator);
         weatherScreen.addView(sectionLabel(s(R.string.label_current_conditions)));
         weatherScreen.addView(weatherVisualPanel());
         weatherRecommendButton = primaryButton(
@@ -498,6 +509,8 @@ public class MainActivity extends Activity {
                 this::useLocationForRecommendation
         );
         recommendationScreen.addView(recommendationLocationButton);
+        recommendationLoadingIndicator = loadingIndicator(s(R.string.status_getting_recommendation));
+        recommendationScreen.addView(recommendationLoadingIndicator);
         recommendationScreen.addView(sectionLabel(s(R.string.label_outfit_card)));
         recommendationScreen.addView(recommendationVisualPanel());
         recommendationHistoryButton = secondaryButton(s(R.string.button_view_history), this::viewRecommendationHistory);
@@ -580,6 +593,8 @@ public class MainActivity extends Activity {
 
         chatDeleteSessionButton = dangerButton(s(R.string.button_delete_session), this::confirmDeleteChatSession);
         chatScreen.addView(chatDeleteSessionButton);
+        chatLoadingIndicator = loadingIndicator(s(R.string.status_sending_chat));
+        chatScreen.addView(chatLoadingIndicator);
         chatActivityLabel = sectionLabel(s(R.string.chat_conversation));
         chatScreen.addView(chatActivityLabel);
         chatScreen.addView(chatListPanel);
@@ -602,6 +617,8 @@ public class MainActivity extends Activity {
         historyScreen.addView(field(s(R.string.label_history_item_id), historyItemIdInput));
         historyDetailButton = secondaryButton(s(R.string.button_load_item), this::loadHistoryDetail);
         historyScreen.addView(historyDetailButton);
+        historyLoadingIndicator = loadingIndicator(s(R.string.status_loading_history));
+        historyScreen.addView(historyLoadingIndicator);
         historyListLabel = sectionLabel(s(R.string.label_saved_recommendations));
         historyScreen.addView(historyListLabel);
         historyScreen.addView(historyListPanel);
@@ -675,8 +692,20 @@ public class MainActivity extends Activity {
             showFieldError(emailInput, authOutput, s(R.string.error_enter_email));
             return;
         }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            showFieldError(emailInput, authOutput, s(R.string.error_email_invalid));
+            return;
+        }
         if (password.isEmpty()) {
             showFieldError(passwordInput, authOutput, s(R.string.error_enter_password));
+            return;
+        }
+        if ("/auth/register".equals(path) && password.length() < MIN_REGISTER_PASSWORD_LENGTH) {
+            showFieldError(
+                    passwordInput,
+                    authOutput,
+                    s(R.string.error_password_too_short, String.valueOf(MIN_REGISTER_PASSWORD_LENGTH))
+            );
             return;
         }
 
@@ -717,14 +746,35 @@ public class MainActivity extends Activity {
     }
 
     private void saveBaseUrl() {
-        String baseUrl = normalizeBaseUrl(value(baseUrlInput));
+        saveBaseUrlIfValid(true);
+    }
+
+    private boolean saveBaseUrlIfValid(boolean showStatus) {
+        String rawBaseUrl = value(baseUrlInput);
+        clearFieldError(baseUrlInput);
+        if (rawBaseUrl.isEmpty()) {
+            showFieldError(baseUrlInput, authOutput, s(R.string.error_enter_backend_url));
+            return false;
+        }
+
+        String baseUrl = normalizeBaseUrl(rawBaseUrl);
+        if (!isValidBaseUrl(baseUrl)) {
+            showFieldError(baseUrlInput, authOutput, s(R.string.error_backend_url_invalid));
+            return false;
+        }
+
         preferences.edit().putString(KEY_BASE_URL, baseUrl).apply();
         baseUrlInput.setText(baseUrl);
-        authOutput.setText(s(R.string.status_backend_url_saved, baseUrl));
+        if (showStatus) {
+            authOutput.setText(s(R.string.status_backend_url_saved, baseUrl));
+        }
+        return true;
     }
 
     private void checkHealth() {
-        saveBaseUrl();
+        if (!saveBaseUrlIfValid(false)) {
+            return;
+        }
         setLoading(healthButton, true);
         authOutput.setText(s(R.string.status_checking_service));
 
@@ -761,6 +811,7 @@ public class MainActivity extends Activity {
         confirm(
                 s(R.string.confirm_delete_account_title),
                 s(R.string.confirm_delete_account_message),
+                s(R.string.button_delete_account),
                 this::deleteAccount
         );
     }
@@ -795,9 +846,7 @@ public class MainActivity extends Activity {
         }
 
         String city = value(weatherCityInput);
-        clearFieldError(weatherCityInput);
-        if (city.isEmpty()) {
-            showFieldError(weatherCityInput, weatherOutput, s(R.string.error_enter_city));
+        if (!validateCity(weatherCityInput, weatherOutput, city, s(R.string.error_enter_city))) {
             return;
         }
 
@@ -1184,12 +1233,12 @@ public class MainActivity extends Activity {
                 recommendationCityInput.setText(city);
             }
 
-            if (city.isEmpty()) {
-                showFieldError(
-                        recommendationCityInput,
-                        recommendationOutput,
-                        s(R.string.error_enter_city_or_coordinates)
-                );
+            if (!validateCity(
+                    recommendationCityInput,
+                    recommendationOutput,
+                    city,
+                    s(R.string.error_enter_city_or_coordinates)
+            )) {
                 return;
             }
             put(body, "city", city);
@@ -1238,7 +1287,7 @@ public class MainActivity extends Activity {
                 try {
                     JSONObject json = new JSONObject(response);
                     applyPreferenceResponse(json);
-                    preferencesOutput.setText(formatPreference(json));
+                    preferencesOutput.setText(s(R.string.status_preferences_loaded));
                 } catch (Exception ex) {
                     preferencesOutput.setText(s(R.string.error_preferences_response, ex.getMessage()));
                 }
@@ -1272,7 +1321,7 @@ public class MainActivity extends Activity {
                 try {
                     JSONObject json = new JSONObject(response);
                     applyPreferenceResponse(json);
-                    preferencesOutput.setText(s(R.string.status_preferences_saved, formatPreference(json)));
+                    preferencesOutput.setText(s(R.string.status_preferences_saved));
                 } catch (Exception ex) {
                     preferencesOutput.setText(s(R.string.error_preferences_response, ex.getMessage()));
                 }
@@ -1465,6 +1514,7 @@ public class MainActivity extends Activity {
         confirm(
                 s(R.string.confirm_delete_chat_session_title),
                 s(R.string.confirm_delete_chat_session_message),
+                s(R.string.button_delete_session),
                 () -> deleteChatSession(sessionId)
         );
     }
@@ -1567,6 +1617,7 @@ public class MainActivity extends Activity {
         confirm(
                 s(R.string.confirm_clear_history_title),
                 s(R.string.confirm_clear_history_message),
+                s(R.string.button_clear_history),
                 this::clearHistory
         );
     }
@@ -1727,6 +1778,7 @@ public class MainActivity extends Activity {
         confirm(
                 s(R.string.confirm_delete_feedback_title),
                 s(R.string.confirm_delete_feedback_message),
+                s(R.string.button_delete_feedback),
                 () -> deleteFeedback(feedbackId)
         );
     }
@@ -1784,6 +1836,20 @@ public class MainActivity extends Activity {
                 : baseUrl.trim();
 
         return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
+    }
+
+    private boolean isValidBaseUrl(String baseUrl) {
+        try {
+            URI uri = new URI(baseUrl);
+            String scheme = uri.getScheme();
+            return ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))
+                    && uri.getHost() != null
+                    && !uri.getHost().trim().isEmpty()
+                    && uri.getRawQuery() == null
+                    && uri.getRawFragment() == null;
+        } catch (URISyntaxException ex) {
+            return false;
+        }
     }
 
     private void updateStatus() {
@@ -1849,6 +1915,24 @@ public class MainActivity extends Activity {
         if (input != null) {
             input.setError(null);
         }
+    }
+
+    private boolean validateCity(EditText input, TextView output, String city, String emptyMessage) {
+        clearFieldError(input);
+        String value = city == null ? "" : city.trim();
+        if (value.isEmpty()) {
+            showFieldError(input, output, emptyMessage);
+            return false;
+        }
+        if (value.length() > MAX_CITY_LENGTH) {
+            showFieldError(
+                    input,
+                    output,
+                    s(R.string.error_city_too_long, String.valueOf(MAX_CITY_LENGTH))
+            );
+            return false;
+        }
+        return true;
     }
 
     private void fillCityFields(String city) {
@@ -2612,18 +2696,20 @@ public class MainActivity extends Activity {
 
     private LinearLayout screen(String title) {
         LinearLayout layout = verticalLayout();
-        layout.setPadding(0, dp(4), 0, dp(8));
+        layout.setPadding(0, dp(6), 0, dp(8));
 
         LinearLayout.LayoutParams params = matchWrap();
         params.setMargins(0, 0, 0, dp(16));
         layout.setLayoutParams(params);
 
         TextView titleView = text(title);
-        titleView.setTextSize(20);
+        titleView.setTextSize(22);
         titleView.setTextColor(COLOR_TEXT);
         titleView.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
-        titleView.setPadding(0, 0, 0, dp(12));
+        titleView.setIncludeFontPadding(false);
+        titleView.setPadding(0, 0, 0, dp(10));
         layout.addView(titleView);
+        layout.addView(divider());
         return layout;
     }
 
@@ -2866,13 +2952,56 @@ public class MainActivity extends Activity {
         return panel != null && panel.getChildCount() == 1 && panel.getChildAt(0) instanceof TextView;
     }
 
+    private LinearLayout loadingIndicator(String message) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setVisibility(View.GONE);
+        row.setPadding(dp(12), dp(9), dp(12), dp(9));
+        row.setBackground(chipBackground(COLOR_SURFACE, COLOR_SOFT_BORDER));
+
+        LinearLayout.LayoutParams rowParams = matchWrap();
+        rowParams.setMargins(0, 0, 0, dp(10));
+        row.setLayoutParams(rowParams);
+
+        ProgressBar progress = new ProgressBar(this, null, android.R.attr.progressBarStyleSmall);
+        progress.setIndeterminate(true);
+        LinearLayout.LayoutParams progressParams = new LinearLayout.LayoutParams(dp(24), dp(24));
+        progressParams.setMargins(0, 0, dp(10), 0);
+        row.addView(progress, progressParams);
+
+        TextView label = text(message);
+        label.setTextSize(13);
+        label.setTextColor(COLOR_PRIMARY_DARK);
+        label.setIncludeFontPadding(false);
+        row.addView(label, new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+        ));
+        return row;
+    }
+
+    private void setInlineLoading(LinearLayout indicator, boolean loading, String message) {
+        if (indicator == null) {
+            return;
+        }
+
+        if (message != null && indicator.getChildCount() > 1 && indicator.getChildAt(1) instanceof TextView) {
+            ((TextView) indicator.getChildAt(1)).setText(message);
+        }
+        indicator.setVisibility(loading ? View.VISIBLE : View.GONE);
+    }
+
     private TextView emptyState(String value) {
         TextView view = text(value);
         view.setTextColor(COLOR_MUTED);
         view.setTextSize(14);
         view.setGravity(Gravity.CENTER);
-        view.setPadding(dp(12), dp(18), dp(12), dp(18));
-        view.setBackground(panelBackground(COLOR_OUTPUT_SURFACE, COLOR_SOFT_BORDER));
+        view.setLineSpacing(dp(3), 1.0f);
+        view.setMinHeight(dp(112));
+        view.setPadding(dp(16), dp(20), dp(16), dp(20));
+        view.setBackground(panelBackground(COLOR_SURFACE, COLOR_SOFT_BORDER));
         view.setLayoutParams(panelParams());
         return view;
     }
@@ -2919,11 +3048,12 @@ public class MainActivity extends Activity {
     private TextView sectionLabel(String value) {
         TextView view = label(value);
         view.setTextColor(COLOR_PRIMARY_DARK);
-        view.setTextSize(12);
+        view.setTextSize(13);
         view.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+        view.setIncludeFontPadding(false);
 
         LinearLayout.LayoutParams params = matchWrap();
-        params.setMargins(0, dp(6), 0, dp(8));
+        params.setMargins(0, dp(8), 0, dp(8));
         view.setLayoutParams(params);
         return view;
     }
@@ -3135,6 +3265,18 @@ public class MainActivity extends Activity {
         return layout;
     }
 
+    private View divider() {
+        View view = new View(this);
+        view.setBackgroundColor(COLOR_SOFT_BORDER);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(1)
+        );
+        params.setMargins(0, 0, 0, dp(14));
+        view.setLayoutParams(params);
+        return view;
+    }
+
     private LinearLayout verticalLayout() {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -3146,6 +3288,7 @@ public class MainActivity extends Activity {
         view.setText(value);
         view.setTextSize(15);
         view.setTextColor(COLOR_TEXT);
+        view.setLineSpacing(dp(1), 1.0f);
         view.setPadding(0, dp(4), 0, dp(4));
         return view;
     }
@@ -3154,22 +3297,23 @@ public class MainActivity extends Activity {
         TextView view = text(value);
         view.setTextSize(13);
         view.setTextColor(COLOR_MUTED);
-        view.setTypeface(Typeface.DEFAULT_BOLD);
+        view.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+        view.setIncludeFontPadding(false);
         view.setPadding(0, 0, 0, dp(6));
         return view;
     }
 
     private TextView output(String emptyText) {
         TextView view = text(emptyText);
-        view.setTextIsSelectable(true);
+        view.setTextIsSelectable(false);
         view.setTextColor(COLOR_MUTED);
-        view.setTextSize(14);
-        view.setMinHeight(dp(88));
-        view.setPadding(dp(12), dp(11), dp(12), dp(11));
-        view.setBackground(panelBackground(COLOR_OUTPUT_SURFACE, COLOR_SOFT_BORDER));
+        view.setTextSize(12);
+        view.setMinHeight(dp(38));
+        view.setPadding(dp(10), dp(7), dp(10), dp(7));
+        view.setBackground(chipBackground(COLOR_OUTPUT_SURFACE, COLOR_SOFT_BORDER));
 
         LinearLayout.LayoutParams params = matchWrap();
-        params.setMargins(0, dp(12), 0, 0);
+        params.setMargins(0, dp(6), 0, dp(2));
         view.setLayoutParams(params);
         return view;
     }
@@ -3290,11 +3434,15 @@ public class MainActivity extends Activity {
         button.setText(text);
         button.setAllCaps(false);
         button.setTextSize(14);
+        button.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+        button.setIncludeFontPadding(false);
+        button.setGravity(Gravity.CENTER);
         button.setMinWidth(0);
         button.setMinimumWidth(0);
         button.setMinHeight(dimen(R.dimen.button_height));
         button.setMinimumHeight(dimen(R.dimen.button_height));
         button.setPadding(dp(14), 0, dp(14), 0);
+        button.setStateListAnimator(null);
         button.setOnClickListener(view -> action.run());
         return button;
     }
@@ -3372,6 +3520,12 @@ public class MainActivity extends Activity {
 
         button.setEnabled(!loading);
         button.setAlpha(1f);
+        LinearLayout inlineIndicator = loadingIndicatorFor(button);
+        if (inlineIndicator != null) {
+            setInlineLoading(inlineIndicator, loading, loadingMessageFor(button));
+            return;
+        }
+
         if (loading) {
             loadingOperations++;
         } else if (loadingOperations > 0) {
@@ -3381,6 +3535,62 @@ public class MainActivity extends Activity {
         if (loadingSpinner != null) {
             loadingSpinner.setVisibility(loadingOperations > 0 ? View.VISIBLE : View.GONE);
         }
+    }
+
+    private LinearLayout loadingIndicatorFor(Button button) {
+        if (button == weatherButton
+                || button == weatherCoordinatesButton
+                || button == weatherLocationButton) {
+            return weatherLoadingIndicator;
+        }
+        if (button == recommendationButton
+                || button == recommendationCoordinatesButton
+                || button == recommendationLocationButton) {
+            return recommendationLoadingIndicator;
+        }
+        if (button == chatSendButton
+                || button == chatLoadSessionsButton
+                || button == chatLoadMessagesButton
+                || button == chatDeleteSessionButton) {
+            return chatLoadingIndicator;
+        }
+        if (button == historyLoadButton
+                || button == historyDetailButton
+                || button == historyClearButton) {
+            return historyLoadingIndicator;
+        }
+        return null;
+    }
+
+    private String loadingMessageFor(Button button) {
+        if (button == weatherLocationButton || button == recommendationLocationButton) {
+            return s(R.string.location_loading);
+        }
+        if (button == weatherButton || button == weatherCoordinatesButton) {
+            return s(R.string.status_loading_weather);
+        }
+        if (button == recommendationButton || button == recommendationCoordinatesButton) {
+            return s(R.string.status_getting_recommendation);
+        }
+        if (button == chatSendButton) {
+            return s(R.string.status_sending_chat);
+        }
+        if (button == chatLoadSessionsButton) {
+            return s(R.string.status_loading_sessions);
+        }
+        if (button == chatLoadMessagesButton) {
+            return s(R.string.status_loading_messages);
+        }
+        if (button == chatDeleteSessionButton) {
+            return s(R.string.status_deleting_session);
+        }
+        if (button == historyDetailButton) {
+            return s(R.string.status_loading_history_item);
+        }
+        if (button == historyClearButton) {
+            return s(R.string.status_clearing_history);
+        }
+        return s(R.string.status_loading_history);
     }
 
     private GradientDrawable panelBackground(int fillColor, int strokeColor) {
@@ -3424,10 +3634,14 @@ public class MainActivity extends Activity {
     }
 
     private void confirm(String title, String message, Runnable action) {
+        confirm(title, message, s(R.string.button_continue), action);
+    }
+
+    private void confirm(String title, String message, String positiveText, Runnable action) {
         new AlertDialog.Builder(this)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton(s(R.string.button_continue), (dialog, which) -> action.run())
+                .setPositiveButton(positiveText, (dialog, which) -> action.run())
                 .setNegativeButton(s(R.string.button_cancel), null)
                 .show();
     }

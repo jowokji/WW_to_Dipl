@@ -48,3 +48,21 @@ docker compose up --build
 ```
 
 The Maven `verify` lifecycle also runs JaCoCo coverage enforcement. The configured threshold is 70% instruction coverage after excluding configuration, DTO, and entity packages.
+
+## Android Demo Quickstart
+
+1. Start the backend from the project root:
+
+   ```bash
+   docker compose up --build
+   ```
+
+2. Open the `android` folder in Android Studio and run the `app` configuration.
+3. Set the backend URL on the Android Profile screen:
+
+   - Emulator: `http://10.0.2.2:8090/api`
+   - Physical phone: `http://<host-lan-ip>:8090/api`
+
+4. Tap `Health` in the app to verify connectivity.
+
+More Android setup, APK build, and troubleshooting notes are in `android/README.md`.

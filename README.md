@@ -2,6 +2,15 @@
 
 WeatherWear backend for a diploma project.
 
+## Prerequisites
+
+Before running the project locally, install:
+
+- Java 17 or newer
+- Maven
+- Docker Desktop
+- Android Studio with Android SDK, if you want to run the Android client
+
 ## Backend structure
 
 - Java source code: `src/main/java/com/weatherwear`
@@ -36,6 +45,25 @@ Then open `.env` and replace the placeholder values for:
 - `LLM_API_KEY`
 
 Docker Compose reads `.env` automatically from the project root. The file is ignored by Git because it contains local secrets.
+
+After startup, the local backend is available at:
+
+- API base URL: `http://localhost:8090/api`
+- Health check: `http://localhost:8090/api/health`
+- Swagger UI: `http://localhost:8090/api/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8090/api/api-docs`
+
+To stop the local services, run:
+
+```bash
+docker compose down
+```
+
+To stop the services and remove local database volumes, run:
+
+```bash
+docker compose down -v
+```
 
 ## Verification Commands
 
